@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import static tool.Constants.BORDER_THICKNESS;
+import static tool.Constants.*;
 
 public class ZoomViewport extends JPanel {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
@@ -228,7 +228,7 @@ public class ZoomViewport extends JPanel {
         conLog.trace("Width = {}", width);
 
         // Calculate the scale
-        int insideWidth = width - 2 * BORDER_THICKNESS;
+        int insideWidth = width - 2 * BORDERS.BORDER_THICKNESS;
         double svgDiagRectWidth = svgDiagram.getViewRect().getWidth();
         double scale = insideWidth / (svgDiagRectWidth / 200.0 + scaleFactor - zoomFactor) / 200;
         double x = (svgDiagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);

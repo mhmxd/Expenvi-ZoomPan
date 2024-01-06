@@ -64,7 +64,7 @@ public class PanFrame extends TrialFrame implements TrialListener, MooseListener
                 if (trialRunning) {
                     debugFocusGained.add(System.currentTimeMillis());
 //                    Border border = new LineBorder(BORDER_FOCUS_GAINED, BORDER_THICKNESS);
-                    mainPanel.setBorder(FOCUS_GAIN_BORDER);
+                    mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
                     setDebugInfo();
                 }
             }
@@ -90,7 +90,7 @@ public class PanFrame extends TrialFrame implements TrialListener, MooseListener
                 debugFocusLost.add(System.currentTimeMillis());
 
                 if (released) {
-                    mainPanel.setBorder(FOCUS_LOST_BORDER);
+                    mainPanel.setBorder(BORDERS.FOCUS_LOST_BORDER);
                 } else {
                     mainPanel.setFocus(false);
                 }
@@ -123,7 +123,7 @@ public class PanFrame extends TrialFrame implements TrialListener, MooseListener
                     released = true;
                     mainPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                     if (!mainPanel.isFocus()) {
-                        Border border = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+                        Border border = new LineBorder(Color.BLACK, BORDERS.BORDER_THICKNESS);
                         mainPanel.setBorder(border);
                         mainPanel.setFocus(false);
                     }

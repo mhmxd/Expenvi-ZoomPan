@@ -29,8 +29,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
-import static tool.Constants.BORDER_THICKNESS;
-import static tool.Constants.MAIN_BACKGROUND;
+import static tool.Constants.*;
 
 public abstract class TrialFrame extends JFrame implements TrialListener {
     private final TaggedLogger conLog = org.tinylog.Logger.tag("TrialFrame");
@@ -101,11 +100,11 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
         this.mainPanel.addListener(this);
 
         int size = Math.min(width, height) - 150;
-        Border border = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+        Border border = new LineBorder(Color.BLACK, BORDERS.BORDER_THICKNESS);
 
         mainPanel.setBounds((width - size) / 2, 50, size, size);
         mainPanel.setBorder(border);
-        mainPanel.setBackground(MAIN_BACKGROUND);
+        mainPanel.setBackground(COLORS.MAIN_BACKGROUND);
         mainPanel.setLayout(null);
         getContentPane().add(mainPanel);
         mainPanel.setVisible(true);
@@ -219,7 +218,7 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
 
             setDebugInfo();
 
-            Border border = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+            Border border = new LineBorder(Color.BLACK, BORDERS.BORDER_THICKNESS);
             mainPanel.setBorder(border);
             mainPanel.setVisible(true);
 
@@ -273,7 +272,7 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
 
 //        trialStatus = TrialStatus.FINISHED;
 //        conLog.info("(trialEnd) New Status: {}", trialStatus);
-        Border border = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+        Border border = new LineBorder(Color.BLACK, BORDERS.BORDER_THICKNESS);
         mainPanel.setBorder(border);
 
         boolean trialHasError = isTrialError();

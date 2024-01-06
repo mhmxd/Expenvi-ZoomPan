@@ -22,6 +22,7 @@ public class ExperimentFrame extends JFrame {
 
     public static String pID = "100";
 
+    public static final int ZOOM_VP_SIZE_mm = 200;
     public static final int NUM_ZOOM_BLOCKS = 1;
     public static final int NUM_ZOOM_REPETITIONS = 3;
 

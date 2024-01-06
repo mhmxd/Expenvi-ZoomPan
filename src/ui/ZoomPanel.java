@@ -26,8 +26,6 @@ import java.util.*;
 import static tool.Constants.*;
 import static tool.Resources.*;
 
-import static tool.Constants.BORDER_THICKNESS;
-
 public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 //    private final TaggedLogger detlog = Logger.tag("DETAIL");
@@ -65,8 +63,8 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
     private final Timer borderBlinker = new Timer(200, new ActionListener() {
         private Border currentBorder;
         private int count = 0;
-        private final Border border1 = new LineBorder(Color.YELLOW, BORDER_THICKNESS);
-        private final Border border2 = new LineBorder(Color.RED, BORDER_THICKNESS);
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.BORDER_THICKNESS);
+        private final Border border2 = new LineBorder(Color.RED, BORDERS.BORDER_THICKNESS);
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -207,7 +205,7 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
         int width = size.width;
         int scaleFactor = 1;
 
-        double scale = (width - 2 * BORDER_THICKNESS) / (svgDiagram.getViewRect().getWidth() / 200.0 + scaleFactor - this.zoomFactor) / 200;
+        double scale = (width - 2 * BORDERS.BORDER_THICKNESS) / (svgDiagram.getViewRect().getWidth() / 200.0 + scaleFactor - this.zoomFactor) / 200;
         double x = (svgDiagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);
         double y = (svgDiagram.getViewRect().getHeight() * scale / 2) - (width / 2.0);
 

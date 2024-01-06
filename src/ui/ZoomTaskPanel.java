@@ -7,6 +7,7 @@ import com.kitfox.svg.SVGRoot;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
+import jdk.jshell.execution.Util;
 import listener.MooseListener;
 import model.ZoomTrial;
 import moose.Memo;
@@ -14,6 +15,7 @@ import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.MoKey;
+import tool.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -34,7 +36,6 @@ public class ZoomTaskPanel
     // Constants
     private final double STEP_SIZE = 0.25;
     private final int ERROR_ROW = 1;
-    private final int ZOOM_VP_SIZE = 600; // px (later should be mm)
 
     // Experiment
     private ZoomTrial activeTrial;
@@ -56,8 +57,8 @@ public class ZoomTaskPanel
     private final Timer borderBlinker = new Timer(200, new ActionListener() {
         private Border currentBorder;
         private int count = 0;
-        private final Border border1 = new LineBorder(Color.YELLOW, BORDER_THICKNESS);
-        private final Border border2 = new LineBorder(Color.RED, BORDER_THICKNESS);
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.BORDER_THICKNESS);
+        private final Border border2 = new LineBorder(Color.RED, BORDERS.BORDER_THICKNESS);
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -115,8 +116,9 @@ public class ZoomTaskPanel
 //        zoomPanel.setVisible(true);
 
         ZoomViewport zVP = new ZoomViewport(moose, isModeZoomIn);
-        zVP.setBounds((getWidth() - ZOOM_VP_SIZE) / 2, 200, ZOOM_VP_SIZE, ZOOM_VP_SIZE);
-        zVP.setBorder(BLACK_BORDER);
+        int zvpSize = Utils.mm2px(ExperimentFrame.ZOOM_VP_SIZE_mm);
+        zVP.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
+        zVP.setBorder(BORDERS.BLACK_BORDER);
         add(zVP);
         zVP.setVisible(true);
 

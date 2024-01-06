@@ -5,15 +5,34 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class Constants {
-    public static final Color BORDER_FOCUS_GAINED = new Color(76, 175, 80);
-    public static final Color BORDER_FOCUS_LOST = new Color(255, 0, 0);
-    public static final Color MAIN_BACKGROUND = Color.WHITE;
-    public static final int BORDER_THICKNESS = 8;
 
-    public static final LineBorder BLACK_BORDER = new LineBorder(Color.BLACK, BORDER_THICKNESS);
-    public static final LineBorder FOCUS_GAIN_BORDER = new LineBorder(BORDER_FOCUS_GAINED, BORDER_THICKNESS);
-    public static final LineBorder FOCUS_LOST_BORDER = new LineBorder(BORDER_FOCUS_LOST, BORDER_THICKNESS);
+    //-- Borders
+    public static class BORDERS {
+        public static final int BORDER_THICKNESS = 8;
 
+        public static final LineBorder BLACK_BORDER = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+        public static final LineBorder FOCUS_GAIN_BORDER = new LineBorder(
+                COLORS.BORDER_FOCUS_GAINED,
+                BORDER_THICKNESS);
+        public static final LineBorder FOCUS_LOST_BORDER = new LineBorder(
+                COLORS.BORDER_FOCUS_LOST,
+                BORDER_THICKNESS);
+    }
+
+    //-- Colors
+    public static class COLORS {
+        public static final Color BORDER_FOCUS_GAINED = new Color(76, 175, 80);
+        public static final Color BORDER_FOCUS_LOST = new Color(255, 0, 0);
+        public static final Color MAIN_BACKGROUND = Color.WHITE;
+    }
+
+    //-- Display properties
+    public static class DISP {
+//        public final static int PPI = 109;
+        public final static int PPI = 89;
+        public final static double INCH_MM = 25.4;
+        public final static double LR_MARGIN_mm = 20; // (mm) Left-right margin
+    }
 
     //-- Strings
     public static class STRINGS {

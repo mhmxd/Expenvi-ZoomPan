@@ -72,7 +72,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                 if (trialRunning) {
                     debugFocusGained.add(System.currentTimeMillis());
                     mainPanel.setFocus(true);
-                    mainPanel.setBorder(FOCUS_GAIN_BORDER);
+                    mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
                     setDebugInfo();
                 }
             }
@@ -86,7 +86,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                 if (trialRunning) {
                     debugFocusLost.add(System.currentTimeMillis());
                     mainPanel.setFocus(false);
-                    mainPanel.setBorder(FOCUS_LOST_BORDER);
+                    mainPanel.setBorder(BORDERS.FOCUS_LOST_BORDER);
                     setDebugInfo();
                 }
             }
@@ -111,7 +111,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                         TrialFrame.LOGGER.info("focusGained");
                         debugFocusGained.add(System.currentTimeMillis());
                         mainPanel.setFocus(true);
-                        mainPanel.setBorder(FOCUS_GAIN_BORDER);
+                        mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
                         setDebugInfo();
                     }
                 }
@@ -135,7 +135,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                     if (trialRunning) {
                         debugFocusGained.add(System.currentTimeMillis());
                         mainPanel.setFocus(true);
-                        mainPanel.setBorder(FOCUS_GAIN_BORDER);
+                        mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
                         setDebugInfo();
                     }
                 }
