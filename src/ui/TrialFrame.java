@@ -30,8 +30,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
-import static util.Constants.BORDER_THICKNESS;
-import static util.Constants.MAIN_BACKGROUND;
+import static tool.Constants.BORDER_THICKNESS;
+import static tool.Constants.MAIN_BACKGROUND;
 
 public abstract class TrialFrame extends JFrame implements TrialListener {
     private final TaggedLogger conLog = org.tinylog.Logger.tag("TrialFrame");
@@ -92,7 +92,7 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
     }
 
     protected void initComponents() {
-        Server.get(moose).start();
+//        Server.get(moose).start();
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);

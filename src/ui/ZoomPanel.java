@@ -9,10 +9,10 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import util.MoKey;
-import util.MooseConstants;
-import util.Pair;
-import util.Tools;
+import tool.MoKey;
+import tool.Pair;
+import tool.Resources;
+import tool.Tools;
 
 import javax.swing.Timer;
 import javax.swing.*;
@@ -21,11 +21,13 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.*;
 
-import static util.Constants.BORDER_THICKNESS;
+import static tool.Constants.*;
+import static tool.Resources.*;
+
+import static tool.Constants.BORDER_THICKNESS;
 
 public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
@@ -36,17 +38,17 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
 
     private final boolean isModeZoomIn;
     private Robot robot;
-    private final SVGIcon icon;
-    private URI uri;
+    private final SVGIcon svgIcon;
+    private URI svgURI;
     private double zoomFactor;
     private int endLevel;
     private double startZoomFactor;
-    private final Timer timerLB;
+
     private Boolean firstZoomInRightDirection;
     private boolean canFinishTrial;
     private final List<Long> debugCanFinish;
 
-    // Actions --------------------------------------------------------------------
+    // Actions --------------------------------------------------------------------------------
     private final AbstractAction SPACE_PRESS = new AbstractAction() {
         public final static String KEY = "SPACE_PRESS";
 
@@ -59,81 +61,127 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
             endTrial();
         }
     };
+
+    // Timers ---------------------------------------------------------------------------------
+    private final Timer borderBlinker = new Timer(200, new ActionListener() {
+        private Border currentBorder;
+        private int count = 0;
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDER_THICKNESS);
+        private final Border border2 = new LineBorder(Color.RED, BORDER_THICKNESS);
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (count == 0) {
+                currentBorder = getBorder();
+            }
+
+            if (count % 2 == 0) {
+                setBorder(border1);
+            } else {
+                setBorder(border2);
+            }
+
+            count++;
+
+            if (count > 5) {
+                borderBlinker.stop();
+                setBorder(currentBorder);
+                count = 0;
+            }
+        }
+    });
+
     // ----------------------------------------------------------------------------------------
 
+    /**
+     * Constructor
+     * @param moose Moose
+     * @param isModeZoomIn Zoom-in (true) or Zoom-out (false)
+     */
     public ZoomPanel(Moose moose, boolean isModeZoomIn) {
         this.isModeZoomIn = isModeZoomIn;
         this.debugCanFinish = new ArrayList<>();
 
-        this.icon = new SVGIcon();
+        svgIcon = new SVGIcon();
 
         try {
-            this.robot = new Robot();
+            robot = new Robot();
         } catch (AWTException ignored) {
+            conLog.warn("Robot could not be instantiated");
         }
 
-        this.timerLB = new Timer(200, new ActionListener() {
-            private Border currentBorder;
-            private int count = 0;
-            private final Border border1 = new LineBorder(Color.YELLOW, BORDER_THICKNESS);
-            private final Border border2 = new LineBorder(Color.RED, BORDER_THICKNESS);
+        svgIcon.setAntiAlias(true);
+        svgIcon.setAutosize(SVGPanel.AUTOSIZE_NONE);
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (count == 0) {
-                    currentBorder = getBorder();
-                }
-
-                if (count % 2 == 0) {
-                    setBorder(border1);
-                } else {
-                    setBorder(border2);
-                }
-
-                count++;
-
-                if (count > 5) {
-                    timerLB.stop();
-                    setBorder(currentBorder);
-                    count = 0;
-                }
-            }
-        });
-
-        addMouseWheelListener(this);
-        moose.addMooseListener(this);
-
-        initComponents();
-    }
-
-    private void initComponents() {
-        this.icon.setAntiAlias(true);
-        this.icon.setAutosize(SVGPanel.AUTOSIZE_NONE);
+        svgURI = isModeZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
+//        conLog.trace("svgURI: {}", svgURI);
 
         getInputMap(
                 JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(MoKey.SPACE, MoKey.SPACE);
         getActionMap().put(MoKey.SPACE, SPACE_PRESS);
+
+        addMouseWheelListener(this);
+        moose.addMooseListener(this);
     }
 
+    /**
+     * Constructor
+     * @param panelDim Dimension of the panel
+     * @param moose Moose
+     * @param isModeZoomIn Zoom-in (true) or Zoom-out (false)
+     */
+    public ZoomPanel(Dimension panelDim, Moose moose, boolean isModeZoomIn) {
+        this.isModeZoomIn = isModeZoomIn;
+        this.debugCanFinish = new ArrayList<>();
+
+        svgIcon = new SVGIcon();
+
+        try {
+            robot = new Robot();
+        } catch (AWTException ignored) {
+            conLog.warn("Robot could not be instantiated");
+        }
+
+        svgIcon.setAntiAlias(true);
+        svgIcon.setAutosize(SVGPanel.AUTOSIZE_NONE);
+
+        svgURI = isModeZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
+//        conLog.trace("svgURI: {}", svgURI);
+
+        getInputMap(
+                JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(MoKey.SPACE, MoKey.SPACE);
+        getActionMap().put(MoKey.SPACE, SPACE_PRESS);
+
+        addMouseWheelListener(this);
+        moose.addMooseListener(this);
+
+        // Set the attributes
+        setBounds(new Rectangle(panelDim));
+    }
+
+    /**
+     * End the trial
+     */
     protected void endTrial() {
-        boolean trialFinished = canFinishTrial();
+        boolean canFinish = canFinishTrial();
         double tolUp = (endLevel + 2.0) / 2 + 1;
         double tolDown = (endLevel - 2.0 - 0.1) / 2 + 1;
-        conLog.trace("(endTrial) Can finish trial? {}", trialFinished);
-        if (!trialFinished) {
-            conLog.trace("Trial not finished");
+        conLog.trace("(endTrial) Can finish trial? {}", canFinish);
+        if (!canFinish) {
+            conLog.trace("Trial cannot be finished");
 //            detlog.info("Trial not finished | endLevel: " + (endLevel / 2 + 1) + " | zoomFactor: " + getZoomFactor() + " | range: " + tolDown + " - " + tolUp);
             TrialFrame.LOGGER.info("Trial not stopped | endLevel: " + (endLevel / 2 + 1) +
                     " | zoomFactor: " + getZoomFactor() + " | range: " + tolDown + " - " + tolUp);
 
             errorTrial();
-            timerLB.start();
+            borderBlinker.start();
 
             return;
         }
 
-        conLog.trace("(endTrial) Trial finished");
+//        conLog.trace("(endTrial) Trial finished");
 //        detlog.info("Trial finished | endLevel: " + (endLevel / 2 + 1) + " | zoomFactor: " + getZoomFactor() + "  | range: " + tolDown + " - " + tolUp);
         TrialFrame.LOGGER.info("Trial stopped | endLevel: " + (endLevel / 2 + 1) +
                 " | zoomFactor: " + getZoomFactor() + "  | range: " + tolDown + " - " + tolUp);
@@ -142,55 +190,43 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
     }
 
     private boolean canFinishTrial() {
-        boolean isFinished = false;
-        //noinspection IfStatementWithIdenticalBranches
-        if (isModeZoomIn) {
-            double tolUp = endLevel + 2;
-            double tolDown = endLevel - 2 - 0.1;
+        double tolUp = endLevel + 2;
+        double tolDown = endLevel - 2 - 0.1;
 
-            if (zoomFactor < tolUp && zoomFactor > tolDown) {
-                isFinished = true;
-            }
-        } else {
-            double tolUp = endLevel + 2;
-            double tolDown = endLevel - 2 - 0.1;
-
-            if (zoomFactor < tolUp && zoomFactor > tolDown) {
-                isFinished = true;
-            }
-        }
-        return isFinished;
+        return (zoomFactor < tolUp) && (zoomFactor > tolDown);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(uri);
-        SVGRoot root = diagram.getRoot();
+        SVGDiagram svgDiagram = SVGCache.getSVGUniverse().getDiagram(svgURI);
+        SVGRoot svgRoot = svgDiagram.getRoot();
 
         Dimension size = this.getSize();
+        conLog.trace("Size: {}", size);
         int width = size.width;
         int scaleFactor = 1;
 
-        double scale = (width - 2 * BORDER_THICKNESS) / (diagram.getViewRect().getWidth() / 200.0 + scaleFactor - this.zoomFactor) / 200;
-        double x = (diagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);
-        double y = (diagram.getViewRect().getHeight() * scale / 2) - (width / 2.0);
+        double scale = (width - 2 * BORDER_THICKNESS) / (svgDiagram.getViewRect().getWidth() / 200.0 + scaleFactor - this.zoomFactor) / 200;
+        double x = (svgDiagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);
+        double y = (svgDiagram.getViewRect().getHeight() * scale / 2) - (width / 2.0);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("\"").append("translate(").append(-x).append(" ").append(-y).append(")").append(" ").append("scale(").append(scale).append(")\"");
+        builder.append("\"").append("translate(").append(-x).append(" ").append(-y).append(")").append(" ")
+                .append("scale(").append(scale).append(")\"");
 
         try {
-            if (root.hasAttribute("transform", AnimationElement.AT_XML)) {
-                root.setAttribute("transform", AnimationElement.AT_XML, builder.toString());
+            if (svgRoot.hasAttribute("transform", AnimationElement.AT_XML)) {
+                svgRoot.setAttribute("transform", AnimationElement.AT_XML, builder.toString());
             } else {
-                root.addAttribute("transform", AnimationElement.AT_XML, builder.toString());
+                svgRoot.addAttribute("transform", AnimationElement.AT_XML, builder.toString());
             }
-            root.updateTime(0f);
+            svgRoot.updateTime(0f);
         } catch (SVGException ignored) {
         }
 
-        this.icon.paintIcon(this, g, 0, 0);
+        this.svgIcon.paintIcon(this, g, 0, 0);
     }
 
     @Override
@@ -219,8 +255,8 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
         }
 
         // If a timer is running, stop it
-        if (timerLB.isRunning()) {
-            timerLB.stop();
+        if (borderBlinker.isRunning()) {
+            borderBlinker.stop();
         }
 
         // Start the trial
@@ -259,7 +295,7 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
     public void mooseClicked(Memo e) {
         //noinspection SwitchStatementWithTooFewBranches
         switch (e.getMode()) {
-            case MooseConstants.SINGLE -> mouseClick(InputEvent.BUTTON1_DOWN_MASK);
+            case STRINGS.SINGLE -> mouseClick(InputEvent.BUTTON1_DOWN_MASK);
         }
     }
 
@@ -281,8 +317,8 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
         }
 
         // If a timer is running, stop it
-        if (timerLB.isRunning()) {
-            timerLB.stop();
+        if (borderBlinker.isRunning()) {
+            borderBlinker.stop();
         }
 
         // Start the test
@@ -378,21 +414,21 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
         this.canFinishTrial = false;
         this.debugCanFinish.clear();
 
-        try {
-            // Load the appropriate SVG resource based on zoom mode (in or out)
-            String resourceName = this.isModeZoomIn ? "zoom_in.svg" : "zoom_out.svg";
-            this.uri = Objects.requireNonNull(TrialPanel.class.getResource("resources/" + resourceName)).toURI();
-        } catch (URISyntaxException ignored) {
-        }
+//        try {
+//            // Load the appropriate SVG resource based on zoom mode (in or out)
+//            String resourceName = this.isModeZoomIn ? "zoom_in.svg" : "zoom_out.svg";
+//            this.uri = Objects.requireNonNull(TrialPanel.class.getResource("resources/" + resourceName)).toURI();
+//        } catch (URISyntaxException ignored) {
+//        }
 
         // Remove the SVG document from the cache to prepare for reloading
-        SVGCache.getSVGUniverse().removeDocument(uri);
+        SVGCache.getSVGUniverse().removeDocument(svgURI);
 
         // Set the SVG icon's URI
-        this.icon.setSvgURI(uri);
+        this.svgIcon.setSvgURI(svgURI);
 
         // Get the SVG diagram and root
-        SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(uri);
+        SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(svgURI);
         SVGRoot root = diagram.getRoot();
 
         // Update the fill color of specific SVG elements based on the given points

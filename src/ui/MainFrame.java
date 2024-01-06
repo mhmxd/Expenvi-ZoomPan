@@ -40,7 +40,7 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         this.moose = new Moose();
 
-        Server.get(moose).start();
+//        Server.get(moose).start();
 
         setTitle("Moose Test Suite");
         setSize(680, 440);

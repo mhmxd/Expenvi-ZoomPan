@@ -1,6 +1,6 @@
 package moose;
 
-import util.MooseConstants;
+import tool.Constants.*;
 
 @SuppressWarnings("unused")
 public class Memo {
@@ -19,6 +19,19 @@ public class Memo {
         this.value1 = "";
         this.value2 = "";
         this.debug = "";
+    }
+
+    /**
+     * More general constructor
+     * @param act Action
+     * @param md Mode
+     * @param values list of values (currently up to two is supported)
+     */
+    public Memo(String act, String md, Object... values) {
+        action = act;
+        mode = md;
+        if (values.length == 1) value1 = String.valueOf(values[0]);
+        if (values.length == 2) value2 = String.valueOf(values[1]);
     }
 
     /**
@@ -105,7 +118,7 @@ public class Memo {
     public static Memo valueOf(String msg) {
         Memo result = new Memo();
         if (msg != null) {
-            String[] parts = msg.split(MooseConstants.SP);
+            String[] parts = msg.split(STRINGS.SP);
 
             if (parts.length >= 4 && parts.length <= 5) {
                 result.action = parts[0];
@@ -129,6 +142,6 @@ public class Memo {
      */
     @Override
     public String toString() {
-        return action + MooseConstants.SP + mode + MooseConstants.SP + value1 + MooseConstants.SP + value2;
+        return action + STRINGS.SP + mode + STRINGS.SP + value1 + STRINGS.SP + value2;
     }
 }

@@ -2,7 +2,7 @@ package moose;
 
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import util.MooseConstants;
+import tool.Constants.*;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -11,15 +11,47 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private final TaggedLogger tlog = Logger.tag(getClass().getSimpleName());
+    private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
+
+    private static Server instance; // Singelton
 
     public static final int PORT = 8000; // always the same
-    private static Server instance;
+
     private ServerSocket serverSocket;
+    private Socket openSocket;
     private PrintWriter outPW;
     private BufferedReader inBR;
     private final ExecutorService executor;
-    private final Moose moose;
+
+    private Moose moose;
+
+    //----------------------------------------------------------------------------------------
+    /**
+     * Get the instance
+     * @return single instance
+     */
+    public static Server get() {
+        if (instance == null) {
+            instance = new Server();
+        }
+        return instance;
+    }
+
+    /**
+     * Constructor
+     */
+    private Server() {
+        // Init executerService for running threads
+        executor = Executors.newCachedThreadPool();
+    }
+
+    /**
+     * Set the Moose
+     * @param moose Moose
+     */
+    public void setMoose(Moose moose) {
+        this.moose = moose;
+    }
 
     //----------------------------------------------------------------------------------------
 
@@ -28,18 +60,20 @@ public class Server {
         @Override
         public void run() {
             try {
-                tlog.info("Opening socket...");
+                conLog.info("Opening socket...");
                 if (serverSocket == null) {
-                    tlog.info("Socket was null");
+                    conLog.info("Socket was null");
                     serverSocket = new ServerSocket(PORT);
                 }
-                tlog.info("Accepting connections...");
-                Socket socket = serverSocket.accept();
+                conLog.info("Accepting connections...");
+                openSocket = serverSocket.accept();
 
                 // Create streams
-                inBR = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                outPW = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                tlog.info("Ready! Listening to incoming messages...");
+                inBR = new BufferedReader(new InputStreamReader(openSocket.getInputStream()));
+                outPW = new PrintWriter(
+                        new BufferedWriter(new OutputStreamWriter(openSocket.getOutputStream())),
+                        true);
+                conLog.info("Ready! Listening to incoming messages...");
                 // Start receiving
                 executor.execute(new InRunnable());
 
@@ -74,61 +108,62 @@ public class Server {
             while (!Thread.interrupted() && inBR != null) {
                 try {
                     String message = inBR.readLine();
-                    tlog.trace("Message: {}", message);
+                    conLog.trace("Message: {}", message);
                     if (message != null) {
                         Memo memo = Memo.valueOf(message);
 
                         switch (memo.getAction()) {
-                            case MooseConstants.CLICK, MooseConstants.SCROLL, MooseConstants.ZOOM -> {
+                            case STRINGS.CLICK, STRINGS.SCROLL, STRINGS.ZOOM -> {
                                 moose.processMooseEvent(memo);
                             }
-                            case MooseConstants.CONNECTION -> {
-                                if (memo.getMode().equals(MooseConstants.KEEP_ALIVE)) {
+                            case STRINGS.CONNECTION -> {
+                                if (memo.getMode().equals(STRINGS.KEEP_ALIVE)) {
                                     // Send back the message (as confirmation)
                                     send(memo);
                                 }
                             }
                         }
                     } else {
-                        tlog.debug("Moose Disconnected");
+                        conLog.trace("Moose Disconnected");
                         start();
                         break;
                     }
                 } catch (IOException e) {
-                    tlog.debug("Error in reading from Moose");
+                    conLog.warn("Error in reading from Moose");
                     start();
                 }
             }
         }
     }
 
-    /**
-     * Get the instance
-     *
-     * @return single instance
-     */
-    public static Server get(Moose moose) {
-        if (instance == null) {
-            instance = new Server(moose);
-        }
-        return instance;
-    }
-
-    /**
-     * Constructor
-     */
-    public Server(Moose moose) {
-        this.moose = moose;
-
-        // Init executerService for running threads
-        executor = Executors.newCachedThreadPool();
-    }
-
+    //----------------------------------------------------------------------------------------
     /**
      * Start the server
      */
     public void start() {
         executor.execute(new ConnWaitRunnable());
+    }
+
+    /**
+     * Shut down the server
+     */
+    public void shutDown() {
+        try {
+            // Send end message to the Moose
+            send(new Memo(STRINGS.CONNECTION, STRINGS.END, ""));
+
+            // Close the socket, etc.
+            if (serverSocket != null && openSocket != null) {
+                conLog.trace("Closing the socket...");
+                serverSocket.close();
+                openSocket.close();
+            }
+            conLog.trace("Shutting down the executer...");
+            if (executor != null) executor.shutdownNow();
+        } catch (IOException e) {
+            conLog.trace("Couldn't close the socket!");
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -8,7 +8,6 @@ import model.BaseTrial;
 import model.PanTrial;
 import moose.Memo;
 import moose.Moose;
-import util.MooseConstants;
 
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -22,8 +21,8 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.*;
 
-import static util.Constants.*;
-import static util.StringConstants.deli;
+import static tool.Constants.*;
+import static tool.StringConstants.deli;
 
 public class PanFrame extends TrialFrame implements TrialListener, MooseListener {
     private Robot robot;
@@ -278,7 +277,7 @@ public class PanFrame extends TrialFrame implements TrialListener, MooseListener
     public void mooseClicked(Memo e) {
         //noinspection SwitchStatementWithTooFewBranches
         switch (e.getMode()) {
-            case MooseConstants.SINGLE -> {
+            case STRINGS.SINGLE -> {
                 TrialFrame.LOGGER.info("Moose clicked");
                 mouseClick(InputEvent.BUTTON1_DOWN_MASK);
             }

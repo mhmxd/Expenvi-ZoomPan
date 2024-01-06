@@ -1,8 +1,7 @@
 package moose;
 
 import listener.MooseListener;
-import org.tinylog.Logger;
-import util.MooseConstants;
+import static tool.Constants.*;
 
 import javax.swing.event.EventListenerList;
 
@@ -32,24 +31,24 @@ public class Moose {
         MooseListener[] listeners = mooseListener.getListeners(MooseListener.class);
         if (listeners.length > 0) {
             switch (e.getAction()) {
-                case MooseConstants.CLICK -> {
+                case STRINGS.CLICK -> {
                     for (MooseListener l : listeners) {
                         l.mooseClicked(e);
                     }
                 }
-                case MooseConstants.SCROLL -> {
+                case STRINGS.SCROLL -> {
                     for (MooseListener l : listeners) {
                         l.mooseMoved(e);
                     }
                 }
-                case MooseConstants.ZOOM -> {
+                case STRINGS.ZOOM -> {
                     switch (e.getMode()) {
-                        case MooseConstants.ZOOM -> {
+                        case STRINGS.ZOOM -> {
                             for (MooseListener l : listeners) {
                                 l.mooseWheelMoved(e);
                             }
                         }
-                        case MooseConstants.ZOOM_START -> {
+                        case STRINGS.ZOOM_START -> {
                             for (MooseListener l : listeners) {
                                 l.mooseZoomStart(e);
                             }

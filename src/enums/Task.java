@@ -2,9 +2,9 @@ package enums;
 
 @SuppressWarnings("unused")
 public enum Task {
-    ZOOM_OUT(1, "ZoomOut"),
-    ZOOM_IN(2, "ZoomIn"),
-    PAN(3, "Panning");
+    ZOOM_OUT(1, "Zoom-Out"),
+    ZOOM_IN(2, "Zoom-In"),
+    PAN(3, "Pan");
 
     private final int id;
     private final String text;

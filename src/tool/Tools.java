@@ -1,4 +1,4 @@
-package util;
+package tool;
 
 public class Tools {
 

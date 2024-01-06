@@ -10,8 +10,6 @@ import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -19,8 +17,8 @@ import java.awt.event.MouseWheelEvent;
 import java.io.IOException;
 import java.util.*;
 
-import static util.Constants.*;
-import static util.StringConstants.deli;
+import static tool.Constants.*;
+import static tool.StringConstants.deli;
 
 public class ZoomFrame extends TrialFrame implements TrialListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
