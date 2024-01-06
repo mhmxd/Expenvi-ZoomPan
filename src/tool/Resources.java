@@ -2,11 +2,9 @@ package tool;
 
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import ui.TrialPanel;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Objects;
 
 public class Resources {

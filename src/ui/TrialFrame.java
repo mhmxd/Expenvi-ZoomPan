@@ -5,7 +5,6 @@ import enums.Technique;
 import listener.TrialListener;
 import model.BaseTrial;
 import moose.Moose;
-import moose.Server;
 import org.tinylog.TaggedLogger;
 
 import javax.swing.*;

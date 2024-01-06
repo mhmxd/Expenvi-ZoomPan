@@ -9,6 +9,7 @@ import javax.swing.event.EventListenerList;
 
 /**
  * An abstract panel that serves as a base for test-related panels.
+ * Temporary name
  */
 public abstract class TrialPanel extends JPanel {
     private TaggedLogger conLog = Logger.tag("TrialPanel");

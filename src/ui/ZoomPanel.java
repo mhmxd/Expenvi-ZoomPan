@@ -11,7 +11,6 @@ import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.MoKey;
 import tool.Pair;
-import tool.Resources;
 import tool.Tools;
 
 import javax.swing.Timer;
@@ -39,7 +38,7 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
     private final boolean isModeZoomIn;
     private Robot robot;
     private final SVGIcon svgIcon;
-    private URI svgURI;
+    private final URI svgURI;
     private double zoomFactor;
     private int endLevel;
     private double startZoomFactor;
@@ -166,8 +165,8 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
      */
     protected void endTrial() {
         boolean canFinish = canFinishTrial();
-        double tolUp = (endLevel + 2.0) / 2 + 1;
-        double tolDown = (endLevel - 2.0 - 0.1) / 2 + 1;
+        double tolUp = (endLevel + 2.0) / 2 + 1; // Used only in logs
+        double tolDown = (endLevel - 2.0 - 0.1) / 2 + 1; // Used only in logs
         conLog.trace("(endTrial) Can finish trial? {}", canFinish);
         if (!canFinish) {
             conLog.trace("Trial cannot be finished");

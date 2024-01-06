@@ -113,11 +113,13 @@ public class ExperimentFrame extends JFrame {
             JPanel taskPanel = new JPanel();
             switch (task) {
                 case ZOOM_OUT -> {
-                    taskPanel = new ZoomPanel(getSize(), moose, false);
+//                    taskPanel = new ZoomPanel(getSize(), moose, false);
+                    taskPanel = new ZoomTaskPanel(getSize(), moose, false);
                 }
 
                 case ZOOM_IN -> {
-                    taskPanel = new ZoomPanel(getSize(), moose, true);
+                    taskPanel = new ZoomTaskPanel(getSize(), moose, true);
+//                    taskPanel = new ZoomPanel(getSize(), moose, true);
                 }
 
                 case PAN -> {
