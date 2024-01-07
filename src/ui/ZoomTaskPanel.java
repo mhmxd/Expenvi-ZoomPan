@@ -41,11 +41,6 @@ public class ZoomTaskPanel
     private Boolean firstZoomInRightDirection;
     private Moose moose;
 
-    // Tools
-    private Robot robot;
-//    private final SVGIcon svgIcon;
-//    private final URI svgURI;
-
     // UI
     private JPanel zoomViewPort;
 
@@ -153,12 +148,12 @@ public class ZoomTaskPanel
         activeTrial = (ZoomTrial) activeBlock.getTrial(trNum); // Get the trial
 
         // Create the viewport for showing the trial
-        ZoomViewport zVP = new ZoomViewport(activeTrial);
+        zoomViewPort = new ZoomViewport(activeTrial);
         int zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
-        zVP.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
-        zVP.setBorder(BORDERS.BLACK_BORDER);
-        add(zVP);
-        zVP.setVisible(true);
+        zoomViewPort.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
+        zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
+        add(zoomViewPort);
+        zoomViewPort.setVisible(true);
     }
 
     /**

@@ -11,8 +11,7 @@ import tool.Pair;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
@@ -21,7 +20,7 @@ import java.util.Set;
 import static tool.Constants.*;
 import static tool.Resources.*;
 
-public class ZoomViewport extends JPanel implements MouseWheelListener {
+public class ZoomViewport extends JPanel implements MouseListener, MouseWheelListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     private static final double WHEEL_STEP_SIZE = 0.25;
@@ -34,6 +33,7 @@ public class ZoomViewport extends JPanel implements MouseWheelListener {
     private int endLevel;
     private double startZoomFactor;
     private Boolean firstZoomInRightDirection;
+    private boolean hasFocus;
 
     // Tools
     private Robot robot;
@@ -64,6 +64,7 @@ public class ZoomViewport extends JPanel implements MouseWheelListener {
 //        getActionMap().put(MoKey.SPACE, SPACE_PRESS);
 
         addMouseWheelListener(this);
+        addMouseListener(this);
 //        moose.addMooseListener(this);
 
     }
@@ -264,41 +265,24 @@ public class ZoomViewport extends JPanel implements MouseWheelListener {
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
 
-        // Check if the component has focus; if not, exit
-//        if (!hasFocus()) {
-//            return;
-//        }
-
-        // If there's no change in the wheel rotation, exit
-        if (e.getWheelRotation() == 0) {
-            return;
-        }
+        // If not in focus, exit
+        if (!hasFocus) return;
 
         // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
-        if (zoomFactor >= 35 + 1 && e.getWheelRotation() < 0) {
-            return;
-        }
+        if (zoomFactor >= 35 + 1 && e.getWheelRotation() < 0) return;
 
         // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
-        if (this.zoomFactor <= 1 && e.getWheelRotation() > 0) {
-            return;
-        }
+        if (this.zoomFactor <= 1 && e.getWheelRotation() > 0) return;
 
         // If a timer is running, stop it
 //        if (borderBlinker.isRunning()) {
 //            borderBlinker.stop();
 //        }
 
-        // Start the trial
-//        startTrial();
-
         // If it's the first zoom and the direction is not determined, set the direction
         if (firstZoomInRightDirection == null) {
-            if (isZoomIn) {
-                firstZoomInRightDirection = e.getWheelRotation() < 0;
-            } else {
-                firstZoomInRightDirection = e.getWheelRotation() > 0;
-            }
+            if (isZoomIn) firstZoomInRightDirection = e.getWheelRotation() < 0;
+            else firstZoomInRightDirection = e.getWheelRotation() > 0;
         }
 
         // Determine if the trial is finished
@@ -319,5 +303,32 @@ public class ZoomViewport extends JPanel implements MouseWheelListener {
 
         // Repaint to reflect the changes
         repaint();
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        hasFocus = true;
+        setBorder(BORDERS.FOCUS_GAIN_BORDER);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        hasFocus = false;
+        setBorder(BORDERS.FOCUS_LOST_BORDER);
     }
 }
