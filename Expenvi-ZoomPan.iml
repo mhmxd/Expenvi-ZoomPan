@@ -13,5 +13,6 @@
     <orderEntry type="library" name="zxing-core-3.5.1" level="project" />
     <orderEntry type="library" name="tinylog.api" level="project" />
     <orderEntry type="library" name="tinylog.impl" level="project" />
+    <orderEntry type="library" name="google.code.gson" level="project" />
   </component>
 </module>

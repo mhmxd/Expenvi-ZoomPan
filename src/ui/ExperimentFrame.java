@@ -2,6 +2,9 @@ package ui;
 
 import enums.Task;
 import enums.Technique;
+import model.BaseBlock;
+import model.BaseTrial;
+import model.ZoomTrial;
 import moose.Moose;
 import moose.Server;
 import org.tinylog.Logger;
@@ -13,6 +16,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static enums.Task.*;
 import static tool.Constants.*;
@@ -22,13 +28,10 @@ public class ExperimentFrame extends JFrame {
 
     public static String pID = "100";
 
-    public static final int ZOOM_VP_SIZE_mm = 200;
-    public static final int NUM_ZOOM_BLOCKS = 1;
-    public static final int NUM_ZOOM_REPETITIONS = 3;
-
     private Rectangle scrBound;
     private int scrW, scrH;
     private int frW, frH;
+
 
     private Moose moose;
 
@@ -114,13 +117,12 @@ public class ExperimentFrame extends JFrame {
             JPanel taskPanel = new JPanel();
             switch (task) {
                 case ZOOM_OUT -> {
-//                    taskPanel = new ZoomPanel(getSize(), moose, false);
                     taskPanel = new ZoomTaskPanel(getSize(), moose, false);
                 }
 
                 case ZOOM_IN -> {
+                    // Create blocks
                     taskPanel = new ZoomTaskPanel(getSize(), moose, true);
-//                    taskPanel = new ZoomPanel(getSize(), moose, true);
                 }
 
                 case PAN -> {

@@ -1,36 +1,43 @@
 package ui;
 
+import model.BaseBlock;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
 import javax.swing.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 public class TaskPanel extends JPanel {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     // Experiment
-//    protected Task mTask;
-//    protected Block mBlock;
+    protected ArrayList<BaseBlock> blocks = new ArrayList<>();
+    protected BaseBlock activeBlock;
     protected int blockNum, trialNum;
 
     // Flags
     protected boolean trialActive = false;
+
+
+    protected void createBlocks() {
+        // Implemented by the subclasses
+    }
 
     /**
      * Start a block of trials
      * @param blkNum Block number
      */
     protected void startBlock(int blkNum) {
-
+        activeBlock = blocks.get(blkNum - 1);
+        startTrial(1);
     }
 
     /**
      * Show a trial
      * @param trNum Trial number
      */
-    protected void showTrial(int trNum) {
-
+    protected void startTrial(int trNum) {
+        // Implemented by the subclasses
     }
 
     /**

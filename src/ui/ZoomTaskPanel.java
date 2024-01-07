@@ -1,14 +1,7 @@
 package ui;
 
-import com.kitfox.svg.SVGCache;
-import com.kitfox.svg.SVGDiagram;
-import com.kitfox.svg.SVGException;
-import com.kitfox.svg.SVGRoot;
-import com.kitfox.svg.animation.AnimationElement;
-import com.kitfox.svg.app.beans.SVGIcon;
-import com.kitfox.svg.app.beans.SVGPanel;
-import jdk.jshell.execution.Util;
 import listener.MooseListener;
+import model.BaseBlock;
 import model.ZoomTrial;
 import moose.Memo;
 import moose.Moose;
@@ -22,10 +15,9 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URI;
+import java.util.ArrayList;
 
 import static tool.Constants.*;
-import static tool.Resources.*;
 
 public class ZoomTaskPanel
         extends TaskPanel
@@ -34,6 +26,9 @@ public class ZoomTaskPanel
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     // Constants
+    public static final int NUM_ZOOM_BLOCKS = 3;
+    public static final int NUM_ZOOM_REPETITIONS = 3;
+    public static final int ZOOM_VP_SIZE_mm = 200;
     private final double STEP_SIZE = 0.25;
     private final int ERROR_ROW = 1;
 
@@ -44,6 +39,7 @@ public class ZoomTaskPanel
     private int endLevel;
     private double startZoomFactor;
     private Boolean firstZoomInRightDirection;
+    private Moose moose;
 
     // Tools
     private Robot robot;
@@ -87,16 +83,13 @@ public class ZoomTaskPanel
      * Constructor
      * @param dim Desired dimension of the panel
      */
-    public ZoomTaskPanel(Dimension dim, Moose moose, boolean isModeZoomIn) {
+    public ZoomTaskPanel(Dimension dim, Moose ms, boolean isModeZoomIn) {
         setSize(dim);
         setLayout(null);
 
-//        isZoomIn = isModeZoomIn;
-//        svgURI = isModeZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
+        isZoomIn = isModeZoomIn;
+        moose = ms;
 //
-//        svgIcon = new SVGIcon();
-//        svgIcon.setAntiAlias(true);
-//        svgIcon.setAutosize(SVGPanel.AUTOSIZE_NONE);
 //
 //        try {
 //            robot = new Robot();
@@ -115,12 +108,8 @@ public class ZoomTaskPanel
 //        add(zoomPanel);
 //        zoomPanel.setVisible(true);
 
-        ZoomViewport zVP = new ZoomViewport(moose, isModeZoomIn);
-        int zvpSize = Utils.mm2px(ExperimentFrame.ZOOM_VP_SIZE_mm);
-        zVP.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
-        zVP.setBorder(BORDERS.BLACK_BORDER);
-        add(zVP);
-        zVP.setVisible(true);
+        createBlocks();
+        startBlock(1);
 
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(MoKey.SPACE, MoKey.SPACE);
@@ -130,6 +119,46 @@ public class ZoomTaskPanel
         addMouseMotionListener(this);
         addMouseWheelListener(this);
         moose.addMooseListener(this);
+    }
+
+    /**
+     * Cerate zoom blocks
+     */
+    @Override
+    protected void createBlocks() {
+        super.createBlocks();
+
+        for (int i = 0; i < NUM_ZOOM_BLOCKS; i++) {
+            blocks.add(new BaseBlock(i + 1, isZoomIn, NUM_ZOOM_REPETITIONS));
+        }
+    }
+
+    /**
+     * Start a block
+     * @param blkNum Block number (starting from 1)
+     */
+    @Override
+    protected void startBlock(int blkNum) {
+        super.startBlock(blkNum);
+    }
+
+    /**
+     * Show a trial
+     * @param trNum Trial number
+     */
+    @Override
+    protected void startTrial(int trNum) {
+        super.startTrial(trNum);
+
+        activeTrial = (ZoomTrial) activeBlock.getTrial(trNum); // Get the trial
+
+        // Create the viewport for showing the trial
+        ZoomViewport zVP = new ZoomViewport(activeTrial);
+        int zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
+        zVP.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
+        zVP.setBorder(BORDERS.BLACK_BORDER);
+        add(zVP);
+        zVP.setVisible(true);
     }
 
     /**

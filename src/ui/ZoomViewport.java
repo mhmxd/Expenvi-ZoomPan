@@ -4,27 +4,30 @@ import com.kitfox.svg.*;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
-import moose.Moose;
+import model.ZoomTrial;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import tool.MoKey;
 import tool.Pair;
-import tool.Resources;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static tool.Constants.*;
+import static tool.Resources.*;
 
-public class ZoomViewport extends JPanel {
+public class ZoomViewport extends JPanel implements MouseWheelListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
-    private static final double STEP_SIZE = 0.25;
+    private static final double WHEEL_STEP_SIZE = 0.25;
     private static final int ERROR_ROW = 1;
+
+    private ZoomTrial trial;
 
     private boolean isZoomIn;
     private double zoomFactor;
@@ -39,10 +42,15 @@ public class ZoomViewport extends JPanel {
 
     private boolean canFinishTrial;
 
-    public ZoomViewport(Moose moose, boolean isModeZoomIn) {
-        isZoomIn = isModeZoomIn;
+    public ZoomViewport(ZoomTrial zt) {
+        trial = zt;
+        isZoomIn = Objects.equals(trial.task, "ZoomIn");
+
+        svgURI = isZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
 
         svgIcon = new SVGIcon();
+        svgIcon.setAntiAlias(true);
+        svgIcon.setAutosize(SVGPanel.AUTOSIZE_NONE);
 
         try {
             robot = new Robot();
@@ -50,24 +58,25 @@ public class ZoomViewport extends JPanel {
             conLog.warn("Robot could not be instantiated");
         }
 
-        svgIcon.setAntiAlias(true);
-        svgIcon.setAutosize(SVGPanel.AUTOSIZE_NONE);
-
-        svgURI = isModeZoomIn ? Resources.SVG.ZOOM_IN_URI : Resources.SVG.ZOOM_OUT_URI;
-
 //        getInputMap(
 //                JComponent.WHEN_IN_FOCUSED_WINDOW)
 //                .put(MoKey.SPACE, MoKey.SPACE);
 //        getActionMap().put(MoKey.SPACE, SPACE_PRESS);
 
-//        addMouseWheelListener(this);
+        addMouseWheelListener(this);
 //        moose.addMooseListener(this);
 
-        startTrial(1, 3);
+    }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+
+        startTrial(trial.startLevel, trial.endLevel);
     }
 
     public void startTrial(int startLevel, int endLevel) {
-        conLog.trace("(startTrial) int startLevel, int endLevel");
+        conLog.trace("(startTrial) {}: {} -> {}", isZoomIn, startLevel, endLevel);
         int temp = (int) Math.ceil(endLevel / 2f) - (isZoomIn ? 1 : 0);
         Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
 
@@ -99,7 +108,7 @@ public class ZoomViewport extends JPanel {
     }
 
     private void startTrial(int startLevel, int endLevel, Set<Pair<Integer, Integer>> points) {
-        conLog.trace("(startTrial) int startLevel, int endLevel, Set<Pair<Integer, Integer>> points");
+
         // Initialize variables and clear previous data
         this.zoomFactor = startLevel;
         this.endLevel = endLevel;
@@ -249,5 +258,66 @@ public class ZoomViewport extends JPanel {
         }
 
         this.svgIcon.paintIcon(this, g, 0, 0);
+    }
+
+    // --------------------------------------------------------------------------------------------------------
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+
+        // Check if the component has focus; if not, exit
+//        if (!hasFocus()) {
+//            return;
+//        }
+
+        // If there's no change in the wheel rotation, exit
+        if (e.getWheelRotation() == 0) {
+            return;
+        }
+
+        // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
+        if (zoomFactor >= 35 + 1 && e.getWheelRotation() < 0) {
+            return;
+        }
+
+        // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
+        if (this.zoomFactor <= 1 && e.getWheelRotation() > 0) {
+            return;
+        }
+
+        // If a timer is running, stop it
+//        if (borderBlinker.isRunning()) {
+//            borderBlinker.stop();
+//        }
+
+        // Start the trial
+//        startTrial();
+
+        // If it's the first zoom and the direction is not determined, set the direction
+        if (firstZoomInRightDirection == null) {
+            if (isZoomIn) {
+                firstZoomInRightDirection = e.getWheelRotation() < 0;
+            } else {
+                firstZoomInRightDirection = e.getWheelRotation() > 0;
+            }
+        }
+
+        // Determine if the trial is finished
+//        boolean trialFinished = canFinishTrial();
+//        if (!canFinishTrial && trialFinished) {
+//            canFinishTrial = true;
+//            debugCanFinish.add(System.currentTimeMillis());
+//        } else if (canFinishTrial && !trialFinished) {
+//            canFinishTrial = false;
+//        }
+
+        // Calculate the scale based on the step size and mouse wheel rotation
+        // 1 Zoom-Level is 16 notches
+        double scale = WHEEL_STEP_SIZE * e.getWheelRotation();
+
+        // Update the zoomFactor accordingly
+        this.zoomFactor -= scale;
+
+        // Repaint to reflect the changes
+        repaint();
     }
 }
