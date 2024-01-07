@@ -16,6 +16,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static tool.Constants.*;
 
@@ -40,6 +41,9 @@ public class ZoomTaskPanel
     private double startZoomFactor;
     private Boolean firstZoomInRightDirection;
     private Moose moose;
+    private boolean startOnLeft;
+    private int zvpSize; // Size of the viewport in px
+    private int lrMargin; // Left-right margin in px (mm comes from ExperimentFrame)
 
     // UI
     private JPanel zoomViewPort;
@@ -81,6 +85,10 @@ public class ZoomTaskPanel
     public ZoomTaskPanel(Dimension dim, Moose ms, boolean isModeZoomIn) {
         setSize(dim);
         setLayout(null);
+
+        startOnLeft = new Random().nextBoolean(); // Randomly choose whether to start traials on the left or right
+        zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
+        lrMargin = Utils.mm2px(ExperimentFrame.LR_MARGIN_MM);
 
         isZoomIn = isModeZoomIn;
         moose = ms;
@@ -149,11 +157,34 @@ public class ZoomTaskPanel
 
         // Create the viewport for showing the trial
         zoomViewPort = new ZoomViewport(activeTrial);
-        int zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
-        zoomViewPort.setBounds((getWidth() - zvpSize) / 2, 200, zvpSize, zvpSize);
         zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
+        Point position = getZoomViewportPosition(trNum);
+        zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         add(zoomViewPort);
         zoomViewPort.setVisible(true);
+    }
+
+    /**
+     * Generate a random position for the viewport
+     * Position is alteranted between left and right
+     * @return Point position
+     */
+    private Point getZoomViewportPosition(int trNum) {
+        Point position = new Point();
+        position.y = (getHeight() - zvpSize) / 2; // Center
+        conLog.trace("PanelH = {}; TitleBarH = {}; ZVPSize = {}; Center = {}",
+                getHeight(), getInsets().top, zvpSize, position.y);
+        int randLeftX = new Random().nextInt(lrMargin, getWidth()/2 - zvpSize);
+        int randRightX = new Random().nextInt(getWidth()/2, getWidth() - lrMargin - zvpSize);
+        if (startOnLeft) {
+            if (trNum % 2 == 1) position.x = randLeftX; // Trials 1, 3, ... are on left
+            else position.x = randRightX; // Trials 2, 4, ... on right
+        } else {
+            if (trNum % 2 == 1) position.x = randRightX; // Trials 1, 3, ... on right
+            else position.x = randLeftX; // Trials 2, 4, ... on left
+        }
+
+        return position;
     }
 
     /**

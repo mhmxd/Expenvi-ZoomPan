@@ -28,10 +28,12 @@ public class ExperimentFrame extends JFrame {
 
     public static String pID = "100";
 
+    public static double LR_MARGIN_MM = 20.0;
+
     private Rectangle scrBound;
     private int scrW, scrH;
     private int frW, frH;
-
+    public static int titleBarH;
 
     private Moose moose;
 
@@ -65,6 +67,8 @@ public class ExperimentFrame extends JFrame {
 
         Server.get().setMoose(moose);
         Server.get().start();
+
+        titleBarH = getInsets().top;
 
         // Show the info frame
         SwingUtilities.invokeLater(() -> {
@@ -117,12 +121,11 @@ public class ExperimentFrame extends JFrame {
             JPanel taskPanel = new JPanel();
             switch (task) {
                 case ZOOM_OUT -> {
-                    taskPanel = new ZoomTaskPanel(getSize(), moose, false);
+                    taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, false);
                 }
 
                 case ZOOM_IN -> {
-                    // Create blocks
-                    taskPanel = new ZoomTaskPanel(getSize(), moose, true);
+                    taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, true);
                 }
 
                 case PAN -> {
