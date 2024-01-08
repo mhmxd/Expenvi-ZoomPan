@@ -72,7 +72,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                 if (trialRunning) {
                     debugFocusGained.add(System.currentTimeMillis());
                     mainPanel.setFocus(true);
-                    mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
+                    mainPanel.setBorder(BORDERS.FOCUSED_BORDER);
                     setDebugInfo();
                 }
             }
@@ -111,7 +111,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                         TrialFrame.LOGGER.info("focusGained");
                         debugFocusGained.add(System.currentTimeMillis());
                         mainPanel.setFocus(true);
-                        mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
+                        mainPanel.setBorder(BORDERS.FOCUSED_BORDER);
                         setDebugInfo();
                     }
                 }
@@ -135,7 +135,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
                     if (trialRunning) {
                         debugFocusGained.add(System.currentTimeMillis());
                         mainPanel.setFocus(true);
-                        mainPanel.setBorder(BORDERS.FOCUS_GAIN_BORDER);
+                        mainPanel.setBorder(BORDERS.FOCUSED_BORDER);
                         setDebugInfo();
                     }
                 }
@@ -165,7 +165,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
             for (int j = 0; j < temp.size(); j++) {
                 BaseTrial t = temp.get(j);
                 t.blockId = i + 1;
-                t.trialInBlock = j + 1;
+                t.trialNum = j + 1;
             }
 
             trials.addAll(temp);
@@ -214,7 +214,7 @@ public class ZoomFrame extends TrialFrame implements TrialListener {
             logWriter.write(technique.getId() + deli);
             logWriter.write(t.level + deli);
             logWriter.write(t.blockId + deli);
-            logWriter.write(t.trialInBlock + deli);
+            logWriter.write(t.trialNum + deli);
             logWriter.write(t.retries + deli);
             logWriter.write(debugError.size() + deli);
             logWriter.write((isTrialError() ? "0" : "1") + deli);

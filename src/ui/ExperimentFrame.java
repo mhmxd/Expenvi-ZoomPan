@@ -118,7 +118,7 @@ public class ExperimentFrame extends JFrame {
             Technique technique = (Technique) getValue(STRINGS.TECHNIQUE);
 
             // Create the panel based on the chosen task
-            JPanel taskPanel = new JPanel();
+            TaskPanel taskPanel = null;
             switch (task) {
                 case ZOOM_OUT -> {
                     taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, false);
@@ -135,10 +135,10 @@ public class ExperimentFrame extends JFrame {
 
             // Open the frame with the panel
             add(taskPanel);
-            setVisible(true);
 
             // Close the dialog
             infoDialog.setVisible(false);
+            taskPanel.setVisible(true);
         }
     };
 

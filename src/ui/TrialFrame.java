@@ -455,7 +455,7 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
         StringBuilder builder = new StringBuilder();
         builder.append("<html><body>");
         builder.append("Block: ").append(this.currentTrial == null ? "" : this.currentTrial.blockId).append("<br>");
-        builder.append("TrialInBlock: ").append(this.currentTrial == null ? "" : this.currentTrial.trialInBlock).append("<br>");
+        builder.append("TrialInBlock: ").append(this.currentTrial == null ? "" : this.currentTrial.trialNum).append("<br>");
         builder.append("Retries: ").append(this.currentTrial == null ? "" : this.currentTrial.retries).append("<br>");
         builder.append("<br>");
         builder.append("Ready: ").append(getFormattedDate(trialReadyMoment)).append("<br>");

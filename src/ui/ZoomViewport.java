@@ -7,9 +7,12 @@ import com.kitfox.svg.app.beans.SVGPanel;
 import model.ZoomTrial;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
+import tool.MoKey;
 import tool.Pair;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
@@ -23,27 +26,59 @@ import static tool.Resources.*;
 public class ZoomViewport extends JPanel implements MouseListener, MouseWheelListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
-    private static final double WHEEL_STEP_SIZE = 0.25;
-    private static final int ERROR_ROW = 1;
+    private final ZoomTrial trial;
 
-    private ZoomTrial trial;
-
-    private boolean isZoomIn;
-    private double zoomFactor;
-    private int endLevel;
-    private double startZoomFactor;
+    private final boolean isZoomIn;
+    private double zoomLevel;
     private Boolean firstZoomInRightDirection;
     private boolean hasFocus;
+    private AbstractAction endTrialAction; // Received from higher levels
 
     // Tools
     private Robot robot;
     private SVGIcon svgIcon;
     private URI svgURI;
 
-    private boolean canFinishTrial;
 
-    public ZoomViewport(ZoomTrial zt) {
+    // Timers ---------------------------------------------------------------------------------
+    private final Timer borderBlinker = new Timer(200, new ActionListener() {
+        private Border currentBorder;
+        private int count = 0;
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.BORDER_THICKNESS);
+        private final Border border2 = new LineBorder(Color.RED, BORDERS.BORDER_THICKNESS);
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (count == 0) {
+                currentBorder = getBorder();
+            }
+
+            if (count % 2 == 0) {
+                setBorder(border1);
+            } else {
+                setBorder(border2);
+            }
+
+            count++;
+
+            if (count > 5) {
+                borderBlinker.stop();
+                setBorder(currentBorder);
+                count = 0;
+            }
+        }
+    });
+
+    //-----------------------------------------------------------------------------------------
+
+    /**
+     * Constructor
+     * @param zt ZoomTrial
+     * @param endTrAction AbstractAction
+     */
+    public ZoomViewport(ZoomTrial zt, AbstractAction endTrAction) {
         trial = zt;
+        endTrialAction = endTrAction;
         isZoomIn = Objects.equals(trial.task, "ZoomIn");
 
         svgURI = isZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
@@ -58,10 +93,10 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             conLog.warn("Robot could not be instantiated");
         }
 
-//        getInputMap(
-//                JComponent.WHEN_IN_FOCUSED_WINDOW)
-//                .put(MoKey.SPACE, MoKey.SPACE);
-//        getActionMap().put(MoKey.SPACE, SPACE_PRESS);
+        getInputMap(
+                JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(MoKey.SPACE, MoKey.SPACE);
+        getActionMap().put(MoKey.SPACE, SPACE_PRESS);
 
         addMouseWheelListener(this);
         addMouseListener(this);
@@ -73,12 +108,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
 
-        startTrial(trial.startLevel, trial.endLevel);
-    }
-
-    public void startTrial(int startLevel, int endLevel) {
-        conLog.trace("(startTrial) {}: {} -> {}", isZoomIn, startLevel, endLevel);
-        int temp = (int) Math.ceil(endLevel / 2f) - (isZoomIn ? 1 : 0);
+        int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
         Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
 
         if (isZoomIn) {
@@ -105,16 +135,20 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             }
         }
 
-        startTrial(startLevel, endLevel, pointSet);
+        startTrial(trial.startLevel, trial.endLevel, pointSet);
     }
 
+    /**
+     * Start the trial
+     * @param startLevel Start zoom level
+     * @param endLevel End zoom level (to reach)
+     * @param points Set of pairs of points
+     */
     private void startTrial(int startLevel, int endLevel, Set<Pair<Integer, Integer>> points) {
 
         // Initialize variables and clear previous data
-        this.zoomFactor = startLevel;
-        this.endLevel = endLevel;
+        zoomLevel = startLevel;
         this.firstZoomInRightDirection = null;
-        this.canFinishTrial = false;
 
         // Remove the SVG document from the cache to prepare for reloading
         SVGCache.getSVGUniverse().removeDocument(svgURI);
@@ -141,8 +175,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         if (isZoomIn) {
             // Adjust SVG elements for zoom-in mode
             int temp1 = (int) Math.ceil(endLevel / 2f);
-            for (int i = temp1 + ERROR_ROW; i < 35 - temp1 + ERROR_ROW; i++) {
-                for (int j = temp1 + ERROR_ROW; j < 35 - temp1 + ERROR_ROW; j++) {
+            for (int i = temp1 + ZoomTaskPanel.ERROR_ROW; i < 35 - temp1 + ZoomTaskPanel.ERROR_ROW; i++) {
+                for (int j = temp1 + ZoomTaskPanel.ERROR_ROW; j < 35 - temp1 + ZoomTaskPanel.ERROR_ROW; j++) {
                     String id = "r" + String.format("%02d", i) + "_c" + String.format("%02d", j);
                     SVGElement element = root.getChild(id);
                     try {
@@ -158,7 +192,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             int temp1 = (int) Math.ceil(endLevel / 2f);
 
             // Rows above the end level
-            for (int i = 1; i < temp1 - ERROR_ROW; i++) {
+            for (int i = 1; i < temp1 - ZoomTaskPanel.ERROR_ROW; i++) {
                 for (int j = 1; j <= 35; j++) {
                     String id = "r" + String.format("%02d", i) + "_c" + String.format("%02d", j);
                     SVGElement element = root.getChild(id);
@@ -174,7 +208,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             int temp2 = 35 - temp1 + 2;
 
             // Rows below the end level
-            for (int i = temp2 + ERROR_ROW; i <= 35; i++) {
+            for (int i = temp2 + ZoomTaskPanel.ERROR_ROW; i <= 35; i++) {
                 for (int j = 1; j <= 35; j++) {
                     String id = "r" + String.format("%02d", i) + "_c" + String.format("%02d", j);
                     SVGElement element = root.getChild(id);
@@ -188,8 +222,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             }
 
             // Columns left of the end level
-            for (int i = temp1 - ERROR_ROW; i < 35 - ERROR_ROW; i++) {
-                for (int j = 1; j < temp1 - ERROR_ROW; j++) {
+            for (int i = temp1 - ZoomTaskPanel.ERROR_ROW; i < 35 - ZoomTaskPanel.ERROR_ROW; i++) {
+                for (int j = 1; j < temp1 - ZoomTaskPanel.ERROR_ROW; j++) {
                     String id = "r" + String.format("%02d", i) + "_c" + String.format("%02d", j);
                     SVGElement element = root.getChild(id);
                     try {
@@ -202,8 +236,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             }
 
             // Columns right of the end level
-            for (int i = temp1 - ERROR_ROW; i < 35 - ERROR_ROW; i++) {
-                for (int j = temp2 + ERROR_ROW; j <= 35; j++) {
+            for (int i = temp1 - ZoomTaskPanel.ERROR_ROW; i < 35 - ZoomTaskPanel.ERROR_ROW; i++) {
+                for (int j = temp2 + ZoomTaskPanel.ERROR_ROW; j <= 35; j++) {
                     String id = "r" + String.format("%02d", i) + "_c" + String.format("%02d", j);
                     SVGElement element = root.getChild(id);
                     try {
@@ -226,24 +260,33 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         repaint();
     }
 
+    /**
+     * Check whether the trial is a hit (zoom level is in the correct range)
+     * @return True (Hit) or False
+     */
+    protected boolean checkHit() {
+        double tolUp = trial.endLevel + 2;
+        double tolDown = trial.endLevel - 2 - 0.1;
+
+        return (zoomLevel < tolUp) && (zoomLevel > tolDown);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        conLog.trace("painting ZoomViewport");
         SVGDiagram svgDiagram = SVGCache.getSVGUniverse().getDiagram(svgURI);
         SVGRoot svgRoot = svgDiagram.getRoot();
 
         int width = getSize().width;
-        int scaleFactor = 1;
-        conLog.trace("Width = {}", width);
+        int scaleFactor = 1; // Always 1 (don't know why)
 
         // Calculate the scale
         int insideWidth = width - 2 * BORDERS.BORDER_THICKNESS;
         double svgDiagRectWidth = svgDiagram.getViewRect().getWidth();
-        double scale = insideWidth / (svgDiagRectWidth / 200.0 + scaleFactor - zoomFactor) / 200;
+        double scale = insideWidth / (svgDiagRectWidth / 200.0 + scaleFactor - zoomLevel) / 200;
         double x = (svgDiagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);
         double y = (svgDiagram.getViewRect().getHeight() * scale / 2) - (width / 2.0);
-        conLog.trace("x,y = {},{}", x, y);
+
         StringBuilder builder = new StringBuilder();
         builder.append("\"").append("translate(").append(-x).append(" ").append(-y).append(")").append(" ")
                 .append("scale(").append(scale).append(")\"");
@@ -261,7 +304,21 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         this.svgIcon.paintIcon(this, g, 0, 0);
     }
 
-    // --------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------
+    private final AbstractAction SPACE_PRESS = new AbstractAction() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            conLog.debug("SPACE pressed");
+            if (checkHit()) {
+                endTrialAction.actionPerformed(e);
+            } else { // Not the correct zoom level
+                borderBlinker.start();
+            }
+        }
+    };
+
+    // --------------------------------------------------------------------------------------------
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
 
@@ -269,37 +326,32 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         if (!hasFocus) return;
 
         // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
-        if (zoomFactor >= 35 + 1 && e.getWheelRotation() < 0) return;
+        if (zoomLevel >= 35 + 1 && e.getWheelRotation() < 0) return;
 
         // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
-        if (this.zoomFactor <= 1 && e.getWheelRotation() > 0) return;
+        if (this.zoomLevel <= 1 && e.getWheelRotation() > 0) return;
 
         // If a timer is running, stop it
-//        if (borderBlinker.isRunning()) {
-//            borderBlinker.stop();
-//        }
-
-        // If it's the first zoom and the direction is not determined, set the direction
-        if (firstZoomInRightDirection == null) {
-            if (isZoomIn) firstZoomInRightDirection = e.getWheelRotation() < 0;
-            else firstZoomInRightDirection = e.getWheelRotation() > 0;
+        if (borderBlinker.isRunning()) {
+            borderBlinker.stop();
+            setBorder(BORDERS.FOCUSED_BORDER);
         }
 
-        // Determine if the trial is finished
-//        boolean trialFinished = canFinishTrial();
-//        if (!canFinishTrial && trialFinished) {
-//            canFinishTrial = true;
-//            debugCanFinish.add(System.currentTimeMillis());
-//        } else if (canFinishTrial && !trialFinished) {
-//            canFinishTrial = false;
+        // If it's the first zoom and the direction is not determined, set the direction
+        // TODO: Replace with time (instant)
+//        if (firstZoomInRightDirection == null) {
+//            if (isZoomIn) firstZoomInRightDirection = e.getWheelRotation() < 0;
+//            else firstZoomInRightDirection = e.getWheelRotation() > 0;
 //        }
+
+        // TODO: Put instant when the correct zoom level is reached
 
         // Calculate the scale based on the step size and mouse wheel rotation
         // 1 Zoom-Level is 16 notches
-        double scale = WHEEL_STEP_SIZE * e.getWheelRotation();
+        double scale = ZoomTaskPanel.WHEEL_STEP_SIZE * e.getWheelRotation();
 
         // Update the zoomFactor accordingly
-        this.zoomFactor -= scale;
+        this.zoomLevel -= scale;
 
         // Repaint to reflect the changes
         repaint();
@@ -323,7 +375,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     @Override
     public void mouseEntered(MouseEvent e) {
         hasFocus = true;
-        setBorder(BORDERS.FOCUS_GAIN_BORDER);
+        setBorder(BORDERS.FOCUSED_BORDER);
     }
 
     @Override

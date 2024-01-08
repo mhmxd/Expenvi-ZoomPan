@@ -1,6 +1,5 @@
 package tool;
 
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
@@ -11,7 +10,7 @@ public class Constants {
         public static final int BORDER_THICKNESS = 8;
 
         public static final LineBorder BLACK_BORDER = new LineBorder(Color.BLACK, BORDER_THICKNESS);
-        public static final LineBorder FOCUS_GAIN_BORDER = new LineBorder(
+        public static final LineBorder FOCUSED_BORDER = new LineBorder(
                 COLORS.BORDER_FOCUS_GAINED,
                 BORDER_THICKNESS);
         public static final LineBorder FOCUS_LOST_BORDER = new LineBorder(

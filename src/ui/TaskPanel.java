@@ -1,51 +1,45 @@
 package ui;
 
 import model.BaseBlock;
+import model.BaseTrial;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
 import javax.swing.*;
 import java.util.ArrayList;
 
-public class TaskPanel extends JPanel {
+/***
+ * JlayeredPane to use indexes for objects
+ */
+public class TaskPanel extends JLayeredPane {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     // Experiment
     protected ArrayList<BaseBlock> blocks = new ArrayList<>();
     protected BaseBlock activeBlock;
-    protected int blockNum, trialNum;
+    protected BaseTrial activeTrial;
+//    protected int blockNum, trialNum;
 
     // Flags
     protected boolean trialActive = false;
-
 
     protected void createBlocks() {
         // Implemented by the subclasses
     }
 
     /**
-     * Start a block of trials
-     * @param blkNum Block number
+     * Start the current block
      */
-    protected void startBlock(int blkNum) {
-        activeBlock = blocks.get(blkNum - 1);
-        startTrial(1);
+    protected void starTask() {
+        activeBlock = blocks.get(1);
+        startBlock();
     }
 
     /**
      * Show a trial
-     * @param trNum Trial number
      */
-    protected void startTrial(int trNum) {
+    protected void startBlock() {
         // Implemented by the subclasses
-    }
-
-    /**
-     * Implemented by subclasses
-     * @return Was it a hit?
-     */
-    protected boolean checkHit() {
-        return false; // Placeholder
     }
 
     /**
@@ -118,5 +112,7 @@ public class TaskPanel extends JPanel {
 
     }
 
+    protected void nextTrial() {
 
+    }
 }

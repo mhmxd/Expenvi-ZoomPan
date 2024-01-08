@@ -1,12 +1,9 @@
 package model;
 
 import com.google.gson.Gson;
-import ui.ExperimentFrame;
-import ui.MainFrame;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 public class BaseBlock {
 
@@ -34,7 +31,7 @@ public class BaseBlock {
 
             for (int t = 0; t < trials.size(); t++) {
                 trials.get(t).blockId = blkId;
-                trials.get(t).trialInBlock = t + 1;
+                trials.get(t).trialNum = t + 1;
             }
         }
     }
@@ -47,6 +44,10 @@ public class BaseBlock {
     public BaseTrial getTrial(int trNum) {
         if (trNum > trials.size()) return null;
         else return cloneTrial(trials.get(trNum - 1));
+    }
+
+    public boolean isBlockFinished(int trNum) {
+        return trNum >= trials.size();
     }
 
     /**
