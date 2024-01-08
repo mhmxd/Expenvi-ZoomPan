@@ -1,11 +1,14 @@
 package model;
 
 import com.google.gson.Gson;
+import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class BaseBlock {
+    private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     public final ArrayList<BaseTrial> trials = new ArrayList<>();
 
@@ -14,7 +17,7 @@ public class BaseBlock {
      * @param isModeZoomIn Is Zoom-In?
      */
     public BaseBlock(int blkId, boolean isModeZoomIn, int repetition) {
-
+        conLog.trace("Block ID: " + blkId);
         for (int j = 0; j < repetition; j++) {
 
             if (!isModeZoomIn) {

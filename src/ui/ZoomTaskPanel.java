@@ -46,6 +46,8 @@ public class ZoomTaskPanel
      * @param dim Desired dimension of the panel
      */
     public ZoomTaskPanel(Dimension dim, Moose ms, boolean isModeZoomIn) {
+        super();
+
         setSize(dim);
         setLayout(null);
 
@@ -98,12 +100,16 @@ public class ZoomTaskPanel
     }
 
     private void showActiveTrial() {
-        conLog.trace("showActiveTrial");
+
         // Clear the viewport (if added)
         if (getIndexOf(zoomViewPort) != -1) {
             remove(zoomViewPort);
             repaint();
         }
+
+        // Update prgogressLabel (trial/block)
+        progressLabel.setText("Trial: " + activeTrial.trialNum + "/" + "Block: " + activeTrial.blockId);
+        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
         zoomViewPort = new ZoomViewport((ZoomTrial) activeTrial, endTrialAction);

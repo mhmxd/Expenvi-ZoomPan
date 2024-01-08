@@ -6,6 +6,7 @@ import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 
 /***
@@ -23,6 +24,18 @@ public class TaskPanel extends JLayeredPane {
     // Flags
     protected boolean trialActive = false;
 
+    // UI
+    JLabel progressLabel = new JLabel();
+
+    public TaskPanel() {
+        progressLabel.setBounds(2200, 50, 300, 30);
+        progressLabel.setFont(new Font(progressLabel.getFont().getFontName(), Font.PLAIN, 20));
+        progressLabel.setVerticalAlignment(JLabel.TOP);
+        progressLabel.setHorizontalAlignment(JLabel.RIGHT);
+//        progressLabel.setFocusable(false);
+        add(progressLabel, 1);
+    }
+
     protected void createBlocks() {
         // Implemented by the subclasses
     }
@@ -31,7 +44,7 @@ public class TaskPanel extends JLayeredPane {
      * Start the current block
      */
     protected void starTask() {
-        activeBlock = blocks.get(1);
+        activeBlock = blocks.get(0);
         startBlock();
     }
 
