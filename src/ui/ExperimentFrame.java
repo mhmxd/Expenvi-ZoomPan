@@ -117,28 +117,26 @@ public class ExperimentFrame extends JFrame {
             Task task = (Task) getValue(STRINGS.TASK);
             Technique technique = (Technique) getValue(STRINGS.TECHNIQUE);
 
-            // Create the panel based on the chosen task
-            TaskPanel taskPanel = null;
-            switch (task) {
-                case ZOOM_OUT -> {
-                    taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, false);
+            SwingUtilities.invokeLater(() -> {
+                // Create the panel based on the chosen task
+                TaskPanel taskPanel = null;
+                switch (task) {
+                    case ZOOM_OUT, ZOOM_IN -> {
+                        taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, task);
+                    }
+
+                    case PAN -> {
+                        taskPanel = new PanTaskPanel(getContentPane().getSize(), moose, task);
+                    }
                 }
 
-                case ZOOM_IN -> {
-                    taskPanel = new ZoomTaskPanel(getContentPane().getSize(), moose, true);
-                }
+                // Open the frame with the panel
+                add(taskPanel);
 
-                case PAN -> {
-                    new PanPanel();
-                }
-            }
-
-            // Open the frame with the panel
-            add(taskPanel);
-
-            // Close the dialog
-            infoDialog.setVisible(false);
-            taskPanel.setVisible(true);
+                // Close the dialog
+                infoDialog.setVisible(false);
+                taskPanel.setVisible(true);
+            });
         }
     };
 

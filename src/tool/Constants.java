@@ -1,5 +1,6 @@
 package tool;
 
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
@@ -11,17 +12,17 @@ public class Constants {
 
         public static final LineBorder BLACK_BORDER = new LineBorder(Color.BLACK, BORDER_THICKNESS);
         public static final LineBorder FOCUSED_BORDER = new LineBorder(
-                COLORS.BORDER_FOCUS_GAINED,
+                COLORS.GREEN,
                 BORDER_THICKNESS);
         public static final LineBorder FOCUS_LOST_BORDER = new LineBorder(
-                COLORS.BORDER_FOCUS_LOST,
+                COLORS.RED,
                 BORDER_THICKNESS);
     }
 
     //-- Colors
     public static class COLORS {
-        public static final Color BORDER_FOCUS_GAINED = new Color(76, 175, 80);
-        public static final Color BORDER_FOCUS_LOST = new Color(255, 0, 0);
+        public static final Color GREEN = new Color(76, 175, 80);
+        public static final Color RED = new Color(255, 0, 0);
         public static final Color MAIN_BACKGROUND = Color.WHITE;
     }
 
@@ -32,6 +33,7 @@ public class Constants {
         public final static double INCH_MM = 25.4;
         public final static double LR_MARGIN_mm = 20; // (mm) Left-right margin
     }
+
 
     //-- Strings
     public static class STRINGS {

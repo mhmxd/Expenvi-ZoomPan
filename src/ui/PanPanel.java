@@ -21,7 +21,7 @@ public class PanPanel extends TrialPanel {
     private int rotate;
     private Integer xDiff;
     private Integer yDiff;
-    private final PanFocus mPanFocus;
+    private final PanFocusArea mPanFocus;
     private static final int startPosX = 100;
     private static final int startPosY = 500;
     private static final int startBorderSize = 100;
@@ -38,7 +38,7 @@ public class PanPanel extends TrialPanel {
         this.icon.setAntiAlias(true);
         this.icon.setAutosize(SVGPanel.AUTOSIZE_NONE);
 
-        this.mPanFocus = new PanFocus();
+        this.mPanFocus = new PanFocusArea();
         this.mPanFocus.setLayout(null);
         this.mPanFocus.setOpaque(false);
         this.mPanFocus.setFocusable(false);

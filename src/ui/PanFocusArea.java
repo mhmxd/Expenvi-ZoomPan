@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  * A custom JPanel that represents a focus area. It can be either active or inactive.
  */
-public class PanFocus extends JPanel {
+public class PanFocusArea extends JPanel {
     private boolean active;
 
     /**

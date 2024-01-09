@@ -1,5 +1,6 @@
 package ui;
 
+import enums.Task;
 import listener.MooseListener;
 import model.BaseBlock;
 import model.ZoomTrial;
@@ -29,23 +30,24 @@ public class ZoomTaskPanel
     public static final double WHEEL_STEP_SIZE = 0.25;
     public static final int ERROR_ROW = 1;
 
-
     // Experiment
-    private final boolean isZoomIn;
+    private final Task task;
     private final Moose moose;
     private final boolean startOnLeft;
     private final int zvpSize; // Size of the viewport in px
     private final int lrMargin; // Left-right margin in px (mm comes from ExperimentFrame)
 
-    // UI
-    private JPanel zoomViewPort;
+    // Viewport
+    private ZoomViewport zoomViewPort;
 
     // -------------------------------------------------------------------------------------------
     /**
      * Constructor
-     * @param dim Desired dimension of the panel
+     * @param dim Dimension – Desired dimension of the panel
+     * @param ms Moose – Reference to the Moose
+     * @param tsk Task – Type of the task
      */
-    public ZoomTaskPanel(Dimension dim, Moose ms, boolean isModeZoomIn) {
+    public ZoomTaskPanel(Dimension dim, Moose ms, Task tsk) {
         super();
 
         setSize(dim);
@@ -55,15 +57,15 @@ public class ZoomTaskPanel
         zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
         lrMargin = Utils.mm2px(ExperimentFrame.LR_MARGIN_MM);
 
-        isZoomIn = isModeZoomIn;
+        task = tsk;
         moose = ms;
 
         createBlocks();
 
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        addMouseWheelListener(this);
-        moose.addMooseListener(this);
+//        addMouseListener(this);
+//        addMouseMotionListener(this);
+//        addMouseWheelListener(this);
+//        moose.addMooseListener(this);
     }
 
     @Override
@@ -84,7 +86,7 @@ public class ZoomTaskPanel
         super.createBlocks();
 
         for (int i = 0; i < NUM_ZOOM_BLOCKS; i++) {
-            blocks.add(new BaseBlock(i + 1, isZoomIn, NUM_ZOOM_REPETITIONS));
+            blocks.add(new BaseBlock(i + 1, task, NUM_ZOOM_REPETITIONS));
         }
     }
 
@@ -99,6 +101,9 @@ public class ZoomTaskPanel
         showActiveTrial();
     }
 
+    /**
+     * Show the active trial
+     */
     private void showActiveTrial() {
 
         // Clear the viewport (if added)
@@ -114,7 +119,7 @@ public class ZoomTaskPanel
         // Create the viewport for showing the trial
         zoomViewPort = new ZoomViewport((ZoomTrial) activeTrial, endTrialAction);
         zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
-        Point position = findPositionForZoomViewport(activeTrial.trialNum);
+        Point position = findPositionForViewport(activeTrial.trialNum);
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         zoomViewPort.setVisible(true);
         add(zoomViewPort, JLayeredPane.PALETTE_LAYER);
@@ -125,7 +130,7 @@ public class ZoomTaskPanel
      * Position is alteranted between left and right
      * @return Point position
      */
-    private Point findPositionForZoomViewport(int trNum) {
+    private Point findPositionForViewport(int trNum) {
         Point position = new Point();
         position.y = (getHeight() - zvpSize) / 2; // Center
         conLog.trace("PanelH = {}; TitleBarH = {}; ZVPSize = {}; Center = {}",

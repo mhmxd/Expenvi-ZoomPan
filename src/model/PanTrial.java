@@ -6,6 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
+import static tool.Resources.*;
+
 public class PanTrial extends BaseTrial {
     public URI uri;
     public Integer rotation;
@@ -13,13 +15,10 @@ public class PanTrial extends BaseTrial {
     public PanTrial(int level, Integer rotation) {
         super("Panning", level);
 
-        try {
-            switch (level) {
-                case 1 -> this.uri = Objects.requireNonNull(TrialPanel.class.getResource("resources/curve1.svg")).toURI();
-                case 2 -> this.uri = Objects.requireNonNull(TrialPanel.class.getResource("resources/curve2.svg")).toURI();
-                case 3 -> this.uri = Objects.requireNonNull(TrialPanel.class.getResource("resources/curve3.svg")).toURI();
-            }
-        } catch (URISyntaxException ignored) {
+        switch (level) {
+            case 1 -> uri = SVG.PAN_LVL1_URI;
+            case 2 -> uri = SVG.PAN_LVL2_URI;
+            case 3 -> uri = SVG.PAN_LVL3_URI;
         }
 
         this.rotation = rotation;

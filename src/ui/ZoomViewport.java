@@ -108,34 +108,36 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
 
-        int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
-        Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
+        if (aFlag) {
+            int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
+            Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
 
-        if (isZoomIn) {
-            for (int i = temp; i <= 35 - temp + 1; i++) {
-                pointSet.add(Pair.create(temp, i));
-                pointSet.add(Pair.create(temp + 1, i));
-                pointSet.add(Pair.create(35 - temp + 1, i));
-                pointSet.add(Pair.create(35 - temp + 1 - 1, i));
-                pointSet.add(Pair.create(i, temp));
-                pointSet.add(Pair.create(i, temp + 1));
-                pointSet.add(Pair.create(i, 35 - temp + 1));
-                pointSet.add(Pair.create(i, 35 - temp + 1 - 1));
+            if (isZoomIn) {
+                for (int i = temp; i <= 35 - temp + 1; i++) {
+                    pointSet.add(Pair.create(temp, i));
+                    pointSet.add(Pair.create(temp + 1, i));
+                    pointSet.add(Pair.create(35 - temp + 1, i));
+                    pointSet.add(Pair.create(35 - temp + 1 - 1, i));
+                    pointSet.add(Pair.create(i, temp));
+                    pointSet.add(Pair.create(i, temp + 1));
+                    pointSet.add(Pair.create(i, 35 - temp + 1));
+                    pointSet.add(Pair.create(i, 35 - temp + 1 - 1));
+                }
+            } else {
+                for (int i = temp - 1; i <= 35 - temp + 1 + 1; i++) {
+                    pointSet.add(Pair.create(temp - 1, i));
+                    pointSet.add(Pair.create(temp, i));
+                    pointSet.add(Pair.create(35 - temp + 1, i));
+                    pointSet.add(Pair.create(35 - temp + 1 + 1, i));
+                    pointSet.add(Pair.create(i, temp));
+                    pointSet.add(Pair.create(i, temp - 1));
+                    pointSet.add(Pair.create(i, 35 - temp + 1));
+                    pointSet.add(Pair.create(i, 35 - temp + 1 + 1));
+                }
             }
-        } else {
-            for (int i = temp - 1; i <= 35 - temp + 1 + 1; i++) {
-                pointSet.add(Pair.create(temp - 1, i));
-                pointSet.add(Pair.create(temp, i));
-                pointSet.add(Pair.create(35 - temp + 1, i));
-                pointSet.add(Pair.create(35 - temp + 1 + 1, i));
-                pointSet.add(Pair.create(i, temp));
-                pointSet.add(Pair.create(i, temp - 1));
-                pointSet.add(Pair.create(i, 35 - temp + 1));
-                pointSet.add(Pair.create(i, 35 - temp + 1 + 1));
-            }
+
+            startTrial(trial.startLevel, trial.endLevel, pointSet);
         }
-
-        startTrial(trial.startLevel, trial.endLevel, pointSet);
     }
 
     /**
