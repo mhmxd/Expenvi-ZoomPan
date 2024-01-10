@@ -4,7 +4,10 @@ import com.kitfox.svg.*;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
+import listener.MooseListener;
 import model.ZoomTrial;
+import moose.Memo;
+import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.MoKey;
@@ -23,13 +26,14 @@ import java.util.Set;
 import static tool.Constants.*;
 import static tool.Resources.*;
 
-public class ZoomViewport extends JPanel implements MouseListener, MouseWheelListener {
+public class ZoomViewport extends JPanel implements MouseListener, MouseWheelListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     private final ZoomTrial trial;
 
     private final boolean isZoomIn;
     private double zoomLevel;
+    private double mooseZoomStartLevel;
     private Boolean firstZoomInRightDirection;
     private boolean hasFocus;
     private AbstractAction endTrialAction; // Received from higher levels
@@ -76,7 +80,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
      * @param zt ZoomTrial
      * @param endTrAction AbstractAction
      */
-    public ZoomViewport(ZoomTrial zt, AbstractAction endTrAction) {
+    public ZoomViewport(Moose moose, ZoomTrial zt, AbstractAction endTrAction) {
         trial = zt;
         endTrialAction = endTrAction;
         isZoomIn = Objects.equals(trial.task, "ZoomIn");
@@ -100,7 +104,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         addMouseWheelListener(this);
         addMouseListener(this);
-//        moose.addMooseListener(this);
+        moose.addMooseListener(this);
 
     }
 
@@ -327,17 +331,17 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         // If not in focus, exit
         if (!hasFocus) return;
 
-        // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
-        if (zoomLevel >= 35 + 1 && e.getWheelRotation() < 0) return;
-
-        // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
-        if (this.zoomLevel <= 1 && e.getWheelRotation() > 0) return;
-
         // If a timer is running, stop it
         if (borderBlinker.isRunning()) {
             borderBlinker.stop();
             setBorder(BORDERS.FOCUSED_BORDER);
         }
+
+        // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
+        if (zoomLevel >= 35 + 1 && e.getWheelRotation() < 0) return;
+
+        // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
+        if (this.zoomLevel <= 1 && e.getWheelRotation() > 0) return;
 
         // If it's the first zoom and the direction is not determined, set the direction
         // TODO: Replace with time (instant)
@@ -384,5 +388,62 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     public void mouseExited(MouseEvent e) {
         hasFocus = false;
         setBorder(BORDERS.FOCUS_LOST_BORDER);
+    }
+
+    @Override
+    public void mooseClicked(Memo e) {
+
+    }
+
+    @Override
+    public void mooseMoved(Memo e) {
+
+    }
+
+    @Override
+    public void mooseWheelMoved(Memo e) {
+
+        // If not in focus, exit
+        if (!hasFocus) return;
+
+        // If a timer is running, stop it
+        if (borderBlinker.isRunning()) {
+            borderBlinker.stop();
+            setBorder(BORDERS.FOCUSED_BORDER);
+        }
+
+        // Parse the scaling factor from the Memo
+        float scale = Float.parseFloat(e.getValue1());
+
+        // If the scaling factor is zero, do nothing
+        if (scale == 0.0) {
+            return;
+        }
+
+        // Determine the first zoom direction if not set
+        if (firstZoomInRightDirection == null) {
+            if (isZoomIn) {
+                firstZoomInRightDirection = scale < 0;
+            } else {
+                firstZoomInRightDirection = scale > 0;
+            }
+        }
+
+        // If the zoom level is already at maximum and the scale is positive, do nothing
+        if (zoomLevel >= 35 + 1 && scale > 0) {
+            return;
+        }
+
+        // Update the zoom level based on the scaling input
+        // scale * 4: Is 2 rows for 1 Zoom-Level
+        zoomLevel = mooseZoomStartLevel + (scale * 4);
+
+        // Repaint the component to reflect the zooming
+        repaint();
+    }
+
+    @Override
+    public void mooseZoomStart(Memo e) {
+        mooseZoomStartLevel = zoomLevel;
     }
 }

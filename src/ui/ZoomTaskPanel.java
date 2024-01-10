@@ -117,7 +117,7 @@ public class ZoomTaskPanel
         progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
-        zoomViewPort = new ZoomViewport((ZoomTrial) activeTrial, endTrialAction);
+        zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, endTrialAction);
         zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
         Point position = findPositionForViewport(activeTrial.trialNum);
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
