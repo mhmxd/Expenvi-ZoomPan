@@ -38,7 +38,7 @@ public class Moose {
                 }
                 case STRINGS.SCROLL -> {
                     for (MooseListener l : listeners) {
-                        l.mooseMoved(e);
+                        l.mooseScrolled(e);
                     }
                 }
                 case STRINGS.ZOOM -> {

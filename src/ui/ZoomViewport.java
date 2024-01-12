@@ -396,7 +396,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     }
 
     @Override
-    public void mooseMoved(Memo e) {
+    public void mooseScrolled(Memo e) {
 
     }
 

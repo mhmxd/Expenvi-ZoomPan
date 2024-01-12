@@ -297,7 +297,7 @@ public class ZoomPanel extends TrialPanel implements MouseWheelListener, MooseLi
     }
 
     @Override
-    public void mooseMoved(Memo e) {
+    public void mooseScrolled(Memo e) {
     }
 
     @Override

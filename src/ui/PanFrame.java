@@ -285,7 +285,7 @@ public class PanFrame extends TrialFrame implements TrialListener, MooseListener
     }
 
     @Override
-    public void mooseMoved(Memo e) {
+    public void mooseScrolled(Memo e) {
 //        if (isTrialFinished()) {
 //            return;
 //        }

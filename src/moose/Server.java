@@ -133,6 +133,8 @@ public class Server {
                     start();
                 }
             }
+
+            conLog.trace("inBR: {}", inBR);
         }
     }
 

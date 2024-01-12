@@ -7,7 +7,10 @@ import com.kitfox.svg.SVGRoot;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
+import listener.MooseListener;
 import model.PanTrial;
+import moose.Memo;
+import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Constants;
@@ -20,7 +23,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 
-public class PanViewPort extends JPanel implements MouseListener, MouseMotionListener {
+public class PanViewPort extends JPanel implements MouseListener, MouseMotionListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     private final PanTrial trial;
@@ -46,7 +49,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param pt PanTrial
      * @param endTrAction AbstractAction
      */
-    public PanViewPort(PanTrial pt, AbstractAction endTrAction) {
+    public PanViewPort(Moose moose, PanTrial pt, AbstractAction endTrAction) {
         icon = new SVGIcon();
         icon.setAntiAlias(true);
         icon.setAutosize(SVGPanel.AUTOSIZE_NONE);
@@ -64,6 +67,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // Set listeners
         addMouseListener(this);
         addMouseMotionListener(this);
+        moose.addMooseListener(this);
     }
 
     @Override
@@ -116,45 +120,66 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
         this.paintComponent(image.getGraphics());
 
-        // Check if test is finished
-        int[] checkFinished = image.getRGB(
-                focusArea.getX() + PanTaskPanel.CIRCLE_SIZE,
-                focusArea.getY() + PanTaskPanel.CIRCLE_SIZE,
-                focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2),
-                focusArea.getHeight() - (PanTaskPanel.CIRCLE_SIZE * 2),
-                null, 0, focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2));
-
-        for (int c : checkFinished) {
-            // Color RGB of BLACK
-            if (c == -16776961) {
-                focusArea.setActive(true);
-                return true;
-            }
-        }
-
-        // Check if pan has focus
+        // Check if line is inside focus area
         boolean insideFocusArea = false;
-        int[] checkFocus = image.getRGB(
+
+//        int[] checkColors = image.getRGB(
+//                focusArea.getX() + PanTaskPanel.CIRCLE_SIZE,
+//                focusArea.getY() + PanTaskPanel.CIRCLE_SIZE,
+//                focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2),
+//                focusArea.getHeight() - (PanTaskPanel.CIRCLE_SIZE * 2),
+//                null, 0, focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2));
+
+        int[] checkColors = image.getRGB(
                 focusArea.getX(),
                 focusArea.getY(),
                 focusArea.getWidth(),
                 focusArea.getHeight(),
-                null,
-                0,
-                focusArea.getWidth());
+                null, 0, focusArea.getWidth());
 
-        for (int c : checkFocus) {
-            // Color RGB of BLUE
-            if (c == -16777216) {
-//                startTrial();
-
-//                if (!panFocus.isActive() && debugTimeNoPanningStart != 0) {
-//                    debugTimeNoPanning += (System.currentTimeMillis() - debugTimeNoPanningStart);
-//                }
-
+        for (int c : checkColors) {
+            // Color RGB of BLACK?
+            Color clr = new Color(c);
+            if (clr.equals(Color.BLACK)) {
                 insideFocusArea = true;
                 break;
             }
+
+//            if (c == -16776961) {
+//                focusArea.setActive(true);
+////                return true;
+//            }
+        }
+
+        // Check if pan has focus
+
+
+//        int[] checkFocusColors = image.getRGB(
+//                focusArea.getX(),
+//                focusArea.getY(),
+//                focusArea.getWidth(),
+//                focusArea.getHeight(),
+//                null,
+//                0,
+//                focusArea.getWidth());
+
+        for (int c : checkColors) {
+            Color clr = new Color(c);
+            if (clr.equals(Color.BLUE)) {
+                return true;
+            }
+            // Color RGB of BLUE
+//            if (c == -16777216) {
+////                startTrial();
+//
+////                if (!panFocus.isActive() && debugTimeNoPanningStart != 0) {
+////                    debugTimeNoPanning += (System.currentTimeMillis() - debugTimeNoPanningStart);
+////                }
+//
+//                insideFocusArea = true;
+//                return true;
+////                break;
+//            }
         }
 
         // TODO: Check for the 10% time
@@ -282,6 +307,29 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseMoved(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mooseClicked(Memo e) {
+
+    }
+
+    @Override
+    public void mooseScrolled(Memo e) {
+        conLog.trace("Translate: {}, {}", e.getV1Int(), e.getV2Int());
+        if (hasFocus) {
+            translate((int) (e.getV1Int() * PanTaskPanel.GAIN), (int) (e.getV2Int() * PanTaskPanel.GAIN));
+        }
+    }
+
+    @Override
+    public void mooseWheelMoved(Memo e) {
+
+    }
+
+    @Override
+    public void mooseZoomStart(Memo e) {
 
     }
 }

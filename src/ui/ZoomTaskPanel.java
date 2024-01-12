@@ -26,7 +26,7 @@ public class ZoomTaskPanel
     // Constants
     public static final int NUM_ZOOM_BLOCKS = 3;
     public static final int NUM_ZOOM_REPETITIONS = 3;
-    public static final int ZOOM_VP_SIZE_mm = 200;
+    public static final int ZOOM_VP_SIZE_mm = 100;
     public static final double WHEEL_STEP_SIZE = 0.25;
     public static final int ERROR_ROW = 1;
 
@@ -218,7 +218,7 @@ public class ZoomTaskPanel
     }
 
     @Override
-    public void mooseMoved(Memo e) {
+    public void mooseScrolled(Memo e) {
 
     }
 
