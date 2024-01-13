@@ -24,7 +24,7 @@ public class PanTaskPanel extends TaskPanel {
     // Constants
     public static final int NUM_PAN_BLOCKS = 1;
     public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
-    public static final int PAN_VP_SIZE_mm = 100;
+    public static final int PAN_VP_SIZE_mm = 200;
     public static final int FOCUS_SIZE = 200;
     public static final int CIRCLE_SIZE = 60;
     public static final double GAIN = 0.5;

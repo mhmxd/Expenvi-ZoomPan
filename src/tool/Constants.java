@@ -28,8 +28,8 @@ public class Constants {
 
     //-- Display properties
     public static class DISP {
-        public final static int PPI = 109;
-//        public final static int PPI = 89;
+//        public final static int PPI = 109;
+        public final static int PPI = 89;
         public final static double INCH_MM = 25.4;
         public final static double LR_MARGIN_mm = 20; // (mm) Left-right margin
     }

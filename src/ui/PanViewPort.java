@@ -14,6 +14,7 @@ import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Constants;
+import tool.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -123,21 +124,21 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // Check if line is inside focus area
         boolean insideFocusArea = false;
 
-//        int[] checkColors = image.getRGB(
+//        int[] focusAreaPixels = image.getRGB(
 //                focusArea.getX() + PanTaskPanel.CIRCLE_SIZE,
 //                focusArea.getY() + PanTaskPanel.CIRCLE_SIZE,
 //                focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2),
 //                focusArea.getHeight() - (PanTaskPanel.CIRCLE_SIZE * 2),
 //                null, 0, focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2));
 
-        int[] checkColors = image.getRGB(
+        int[] focusAreaPixels = image.getRGB(
                 focusArea.getX(),
                 focusArea.getY(),
                 focusArea.getWidth(),
                 focusArea.getHeight(),
                 null, 0, focusArea.getWidth());
 
-        for (int c : checkColors) {
+        for (int c : focusAreaPixels) {
             // Color RGB of BLACK?
             Color clr = new Color(c);
             if (clr.equals(Color.BLACK)) {
@@ -163,10 +164,49 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 //                0,
 //                focusArea.getWidth());
 
-        for (int c : checkColors) {
+        //-- Check if the circle is *completely* inside the focus area
+        // Define four 'bands' around the area (scanSize = W -> scans row by row)
+        int[] outerBand1 = image.getRGB(
+                focusArea.getX() - Utils.mm2px(1),
+                focusArea.getY() - Utils.mm2px(1),
+                focusArea.getWidth() + Utils.mm2px(2),
+                Utils.mm2px(1),
+                null, 0, focusArea.getWidth() + Utils.mm2px(2));
+
+        int[] outerBand2 = image.getRGB(
+                focusArea.getX() + focusArea.getWidth(),
+                focusArea.getY(),
+                Utils.mm2px(2),
+                focusArea.getHeight(),
+                null, 0, Utils.mm2px(2));
+
+        int[] outerBand3 = image.getRGB(
+                focusArea.getX() - Utils.mm2px(1),
+                focusArea.getY() + focusArea.getHeight(),
+                focusArea.getWidth() + Utils.mm2px(2),
+                Utils.mm2px(2),
+                null, 0, focusArea.getWidth() + Utils.mm2px(2));
+
+        int[] outerBand4 = image.getRGB(
+                focusArea.getX() - Utils.mm2px(1),
+                focusArea.getY(),
+                Utils.mm2px(2),
+                focusArea.getHeight(),
+                null, 0, Utils.mm2px(2));
+
+        for (int c : focusAreaPixels) {
             Color clr = new Color(c);
-            if (clr.equals(Color.BLUE)) {
-                return true;
+            if (clr.equals(Color.BLUE)) { // At least one pixel of the circle is inside
+//                return true; // Uncomment for "the moment circle enters"
+
+                // Check so the circle is not in any of the four bands
+                if (!hasColor(outerBand1, Color.BLUE)
+                && !hasColor(outerBand2, Color.BLUE)
+                && !hasColor(outerBand3, Color.BLUE)
+                && !hasColor(outerBand4, Color.BLUE)) {
+                    return true;
+                }
+
             }
             // Color RGB of BLUE
 //            if (c == -16777216) {
@@ -189,6 +229,21 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 //        }
 
         focusArea.setActive(insideFocusArea);
+
+        return false;
+    }
+
+    /**
+     * Check whether a (RGB) pixel array include a color
+     * @param pixelArray Array of TYPE_INT_ARGB
+     * @param color COlor to check
+     * @return True if there is one pixel with the input color
+     */
+    private boolean hasColor(int[] pixelArray, Color color) {
+        for (int p : pixelArray) {
+            Color pc = new Color(p);
+            if (pc.equals(color)) return true;
+        }
 
         return false;
     }
