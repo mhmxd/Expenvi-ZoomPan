@@ -6,7 +6,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import enums.Task;
 import enums.Technique;
-import moose.Server;
+import control.Server;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Constants.*;

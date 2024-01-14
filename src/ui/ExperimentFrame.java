@@ -2,25 +2,17 @@ package ui;
 
 import enums.Task;
 import enums.Technique;
-import model.BaseBlock;
-import model.BaseTrial;
-import model.ZoomTrial;
 import moose.Moose;
-import moose.Server;
+import control.Server;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import ui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-import static enums.Task.*;
 import static tool.Constants.*;
 
 public class ExperimentFrame extends JFrame {

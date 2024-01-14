@@ -1,7 +1,7 @@
 package model;
 
 abstract public class BaseTrial {
-    // TODO: Add a trial ID
+    public int id;
     public final String task;
     public int blockId;
     public int trialNum;

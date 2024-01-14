@@ -1,5 +1,7 @@
-package moose;
+package control;
 
+import moose.Memo;
+import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Constants.*;

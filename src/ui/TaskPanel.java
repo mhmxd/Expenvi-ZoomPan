@@ -30,8 +30,8 @@ public class TaskPanel extends JLayeredPane {
     public TaskPanel() {
         progressLabel.setBounds(2200, 50, 300, 30);
         progressLabel.setFont(new Font(progressLabel.getFont().getFontName(), Font.PLAIN, 20));
-        progressLabel.setVerticalAlignment(JLabel.TOP);
-        progressLabel.setHorizontalAlignment(JLabel.RIGHT);
+        progressLabel.setVerticalAlignment(JLabel.CENTER);
+        progressLabel.setHorizontalAlignment(JLabel.CENTER);
 //        progressLabel.setFocusable(false);
         add(progressLabel, 1);
     }

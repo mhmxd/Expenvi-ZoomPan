@@ -4,6 +4,8 @@ import static tool.Constants.*;
 
 public class Utils {
 
+    private static final long MS_IN_DAY = 24 * 60 * 60 * 1000; // Milliseconds in a day
+
     /**
      * mm to pixel
      * @param mm - millimeters
@@ -20,5 +22,13 @@ public class Utils {
      */
     public static double px2mm(double px) {
         return (px / DISP.PPI) * DISP.INCH_MM;
+    }
+
+    /**
+     * Get the time in millis (in each day)
+     * @return Timestamp (long)
+     */
+    public static long nowMillisInDay() {
+        return System.currentTimeMillis() % MS_IN_DAY;
     }
 }

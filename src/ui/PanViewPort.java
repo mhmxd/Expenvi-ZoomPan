@@ -1,5 +1,6 @@
 package ui;
 
+import com.google.common.base.Stopwatch;
 import com.kitfox.svg.SVGCache;
 import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.SVGException;
@@ -7,6 +8,9 @@ import com.kitfox.svg.SVGRoot;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
+import control.Logex;
+import enums.TrialEvent;
+import enums.TrialStatus;
 import listener.MooseListener;
 import model.PanTrial;
 import moose.Memo;
@@ -18,11 +22,15 @@ import tool.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 public class PanViewPort extends JPanel implements MouseListener, MouseMotionListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
@@ -44,6 +52,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     private static final int startBorderSize = 100;
 
     private BufferedImage image;
+    private Stopwatch insideFocusStopwatch;
 
     /**
      * Constructor
@@ -57,6 +66,9 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
         trial = pt;
         endTrialAction = endTrAction;
+
+        // Creat the inside stopwatch
+        insideFocusStopwatch = Stopwatch.createUnstarted();
 
         // Add the focus area
         focusArea = new PanFocusArea();
@@ -75,9 +87,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
         
-        if (aFlag) {
-            startTrial(trial.uri, trial.rotation);
-        }
+        if (aFlag) startTrial(trial.uri, trial.rotation);
     }
 
     /**
@@ -86,6 +96,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param rotation int
      */
     public void startTrial(URI uri, int rotation) {
+
         icon.setSvgURI(uri);
         rotate = rotation;
         xDiff = null;
@@ -113,23 +124,14 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
 
     /**
-     * Check whether the trial is a hit (end circle is inside focus area and < 10% was outside)
+     * Check whether the trial is at the end (circle is inside focus area)
+     * Also, manages the focus area's activatino/deactivation
      * @return True (Hit) or False
      */
-    protected boolean checkHit() {
+    protected boolean isTrialFinished() {
         if (image == null) return false;
 
         this.paintComponent(image.getGraphics());
-
-        // Check if line is inside focus area
-        boolean insideFocusArea = false;
-
-//        int[] focusAreaPixels = image.getRGB(
-//                focusArea.getX() + PanTaskPanel.CIRCLE_SIZE,
-//                focusArea.getY() + PanTaskPanel.CIRCLE_SIZE,
-//                focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2),
-//                focusArea.getHeight() - (PanTaskPanel.CIRCLE_SIZE * 2),
-//                null, 0, focusArea.getWidth() - (PanTaskPanel.CIRCLE_SIZE * 2));
 
         int[] focusAreaPixels = image.getRGB(
                 focusArea.getX(),
@@ -137,32 +139,6 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
                 focusArea.getWidth(),
                 focusArea.getHeight(),
                 null, 0, focusArea.getWidth());
-
-        for (int c : focusAreaPixels) {
-            // Color RGB of BLACK?
-            Color clr = new Color(c);
-            if (clr.equals(Color.BLACK)) {
-                insideFocusArea = true;
-                break;
-            }
-
-//            if (c == -16776961) {
-//                focusArea.setActive(true);
-////                return true;
-//            }
-        }
-
-        // Check if pan has focus
-
-
-//        int[] checkFocusColors = image.getRGB(
-//                focusArea.getX(),
-//                focusArea.getY(),
-//                focusArea.getWidth(),
-//                focusArea.getHeight(),
-//                null,
-//                0,
-//                focusArea.getWidth());
 
         //-- Check if the circle is *completely* inside the focus area
         // Define four 'bands' around the area (scanSize = W -> scans row by row)
@@ -201,34 +177,33 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
                 // Check so the circle is not in any of the four bands
                 if (!hasColor(outerBand1, Color.BLUE)
-                && !hasColor(outerBand2, Color.BLUE)
-                && !hasColor(outerBand3, Color.BLUE)
-                && !hasColor(outerBand4, Color.BLUE)) {
+                        && !hasColor(outerBand2, Color.BLUE)
+                        && !hasColor(outerBand3, Color.BLUE)
+                        && !hasColor(outerBand4, Color.BLUE)) {
                     return true;
                 }
 
             }
-            // Color RGB of BLUE
-//            if (c == -16777216) {
-////                startTrial();
-//
-////                if (!panFocus.isActive() && debugTimeNoPanningStart != 0) {
-////                    debugTimeNoPanning += (System.currentTimeMillis() - debugTimeNoPanningStart);
-////                }
-//
-//                insideFocusArea = true;
-//                return true;
-////                break;
-//            }
         }
+
+        // Check if line is inside focus area
+        focusArea.setActive(false);
+        for (int c : focusAreaPixels) {
+            Color clr = new Color(c);
+            if (clr.equals(Color.BLACK)) {
+                focusArea.setActive(true);
+                logInsideFocus(); // LOG
+                return false;
+            }
+        }
+
+        logOutsideFocus();
 
         // TODO: Check for the 10% time
 //        if (!insideFocusArea && panFocus.isActive()) {
 //            this.debugTimeNoPanningStart = System.currentTimeMillis();
 //            errorTrial();
 //        }
-
-        focusArea.setActive(insideFocusArea);
 
         return false;
     }
@@ -254,13 +229,27 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param dY Delta-Y
      */
     public void translate(int dX, int dY) {
+        Logex.get().log(TrialEvent.PAN); // LOG
+
         this.xDiff += dX;
         this.yDiff += dY;
 
         repaint();
 
+        // Check for the end of the trial
         SwingUtilities.invokeLater(() -> {
-            if (checkHit()) endTrialAction.actionPerformed(null);
+            if (isTrialFinished()) {
+                Duration totalTrialDuration = Duration.between(
+                        Logex.get().getTrialInstant(TrialEvent.FIRST_PAN),
+                        Instant.now());
+
+                // Inside focus time < 90% of the total time => error
+                if (insideFocusStopwatch.elapsed().dividedBy(totalTrialDuration) < 0.9) {
+                    ActionEvent endTrialEvent = new ActionEvent(
+                            this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT);
+                    endTrialAction.actionPerformed(endTrialEvent);
+                }
+            }
         });
     }
 
@@ -310,8 +299,6 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mousePressed(MouseEvent e) {
-        conLog.trace("Mouse Pressed");
-
         if (hasFocus) { // Pressed inside
             isPanning = true;
 
@@ -325,7 +312,6 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        conLog.trace("Mouse Released");
         // Change back the cursor and the border
         getParent().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         if (!hasFocus) {
@@ -387,4 +373,28 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     public void mooseZoomStart(Memo e) {
 
     }
+
+    // Logs ------------------------------------------------------------------------
+    private void logInsideFocus() {
+        // If hasn't entered before or has exited before
+        if (!Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER) ||
+                Logex.get().hasLoggedKey(TrialEvent.FOCUS_EXIT)) {
+            Logex.get().log(TrialEvent.FOCUS_ENTER);
+
+            // Start the stopwatch (if not already started)
+            if (!insideFocusStopwatch.isRunning()) insideFocusStopwatch.start();
+        }
+    }
+
+    private void logOutsideFocus() {
+        // If hasn't exited before or has entered before
+        if (!Logex.get().hasLoggedKey(TrialEvent.FOCUS_EXIT) ||
+                Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER)) {
+            Logex.get().log(TrialEvent.FOCUS_EXIT);
+
+            // Start the stopwatch (if not already started)
+            if (insideFocusStopwatch.isRunning()) insideFocusStopwatch.stop();
+        }
+    }
+
 }

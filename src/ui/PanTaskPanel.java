@@ -1,20 +1,23 @@
 package ui;
 
+import com.google.common.base.Stopwatch;
+import control.Logex;
 import enums.Task;
-import jdk.jshell.execution.Util;
+import enums.TrialStatus;
 import model.BaseBlock;
 import model.PanTrial;
-import model.ZoomTrial;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import tool.Constants;
 import tool.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static tool.Constants.*;
 
@@ -28,6 +31,7 @@ public class PanTaskPanel extends TaskPanel {
     public static final int FOCUS_SIZE = 200;
     public static final int CIRCLE_SIZE = 60;
     public static final double GAIN = 0.5;
+    public static final int ERROR_DURATION = 3 * 1000; // Duration to keep the error visible
 
     // Experiment
     private final Task task;
@@ -89,15 +93,52 @@ public class PanTaskPanel extends TaskPanel {
     }
 
     /**
+     * Clear the viewport (if added)
+     */
+    private void clearActiveLayer() {
+        for (Component c : getComponentsInLayer(JLayeredPane.PALETTE_LAYER)) {
+            remove(c);
+            repaint();
+        }
+//        if (getIndexOf(panViewPort) != -1) {
+//            remove(panViewPort);
+//            repaint();
+//        }
+    }
+
+    /**
+     * Clear the viewport and show an error in the middle of the panel
+     * @param message Error mesage
+     */
+    private void showError(String message) {
+        clearActiveLayer();
+
+        JLabel errLabel = new JLabel(message);
+        errLabel.setBounds(getWidth() - 1200, getHeight() / 2, 1000, 30);
+        errLabel.setFont(new Font(errLabel.getFont().getFontName(), Font.PLAIN, 30));
+        errLabel.setForeground(Color.red);
+        errLabel.setVerticalAlignment(JLabel.CENTER);
+        errLabel.setHorizontalAlignment(JLabel.CENTER);
+        add(errLabel, JLayeredPane.PALETTE_LAYER);
+        repaint();
+
+        // Disappear after set time
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                nextTrial();
+            }
+        }, ERROR_DURATION);
+
+    }
+
+    /**
      * Show the active trial
      */
     private void showActiveTrial() {
 
-        // Clear the viewport (if added)
-        if (getIndexOf(panViewPort) != -1) {
-            remove(panViewPort);
-            repaint();
-        }
+        // Clear the viewport
+        clearActiveLayer();
 
         // Update prgogressLabel (trial/block)
         progressLabel.setText("Trial: " + activeTrial.trialNum + "/" + "Block: " + activeTrial.blockId);
@@ -110,6 +151,9 @@ public class PanTaskPanel extends TaskPanel {
         panViewPort.setBounds(position.x, position.y, pvpSize, pvpSize);
         panViewPort.setVisible(true);
         add(panViewPort, JLayeredPane.PALETTE_LAYER);
+
+        // Set up the Logex for this trial
+        Logex.get().activateTrial(activeTrial);
     }
 
     /**
@@ -153,7 +197,17 @@ public class PanTaskPanel extends TaskPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             conLog.trace("Trial Ended");
-            nextTrial();
+            // There was an error
+            if (e.getID() == TrialStatus.ERROR) {
+                // Curve was out more than 10% of the time
+                if (e.getActionCommand() == TrialStatus.TEN_PERCENT_OUT) {
+                    conLog.error("Trial Error: {}", e.getActionCommand());
+                    // Show the error (automatically goes to the next trial)
+                    showError("The curve must not be outside for more than 10% of the time!");
+                }
+            } else {
+                nextTrial();
+            }
         }
     };
 }

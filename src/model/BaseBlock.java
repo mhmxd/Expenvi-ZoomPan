@@ -37,6 +37,7 @@ public class BaseBlock {
                     for (int t = 0; t < trials.size(); t++) {
                         trials.get(t).blockId = blkId;
                         trials.get(t).trialNum = t + 1;
+                        trials.get(t).id = trials.get(t).blockId * 100 + trials.get(t).trialNum;
                     }
                 }
             }
@@ -54,6 +55,7 @@ public class BaseBlock {
                 for (int t = 0; t < trials.size(); t++) {
                     trials.get(t).blockId = blkId;
                     trials.get(t).trialNum = t + 1;
+                    trials.get(t).id = trials.get(t).blockId * 100 + trials.get(t).trialNum;
                 }
 
             }
@@ -100,6 +102,7 @@ public class BaseBlock {
                         BaseTrial t = temp.get(j);
                         t.blockId = i + 1;
                         t.trialNum = j + 1;
+                        t.id = t.blockId * 100 + t.trialNum;
                     }
 
                     trials.addAll(temp);
