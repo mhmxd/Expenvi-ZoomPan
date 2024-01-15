@@ -194,14 +194,17 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param focusPixels Array of the RGBA pixels
      */
     private void scanFocusAreaForCurve(int[] focusPixels) {
+        // Has the curve entered the focus area?
+        boolean focusEntered = Logex.get().hasLogged(TrialEvent.FIRST_FOCUS_ENTER);
+
         // Check if line is inside focus area
         focusArea.setActive(false);
-        nScans++;
+        if (focusEntered) nScans++; // Only count after entering the focus area
         for (int c : focusPixels) {
             Color clr = new Color(c);
             if (clr.equals(Color.BLACK)) {
                 focusArea.setActive(true);
-                nScansCurveInsideFocus++;
+                if (focusEntered) nScansCurveInsideFocus++; // Only count after entering the focus area
 
                 logInsideFocus(); // LOG
                 return;
@@ -252,17 +255,14 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // Check for the end of the trial
         SwingUtilities.invokeLater(() -> {
             if (isTrialFinished()) {
-                conLog.trace("FF, Now: {}, {}",
-                        Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
-                        Instant.now().toString());
                 Duration totalTrialDuration = Duration.between(
                         Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
                         Instant.now());
 
                 // < 90% of the curve traversed inside the focus area => error
                 ActionEvent endTrialEvent = (wasTrialAccurate())
-                        ? new ActionEvent(this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT)
-                        : new ActionEvent(this, TrialStatus.HIT, "");
+                        ? new ActionEvent(this, TrialStatus.HIT, "")
+                        : new ActionEvent(this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT);
                 endTrialAction.actionPerformed(endTrialEvent);
             }
         });
