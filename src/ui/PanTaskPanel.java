@@ -4,8 +4,10 @@ import com.google.common.base.Stopwatch;
 import control.Logex;
 import enums.Task;
 import enums.TrialStatus;
+import jdk.jshell.execution.Util;
 import model.BaseBlock;
 import model.PanTrial;
+import model.ZoomTrial;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
@@ -28,10 +30,14 @@ public class PanTaskPanel extends TaskPanel {
     public static final int NUM_PAN_BLOCKS = 1;
     public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
     public static final int PAN_VP_SIZE_mm = 200;
-    public static final int FOCUS_SIZE = 200;
+    public static final int FOCUS_SIZE_mm = 5;
+//    public static final int FOCUS_SIZE = Utils.mm2px(FOCUS_SIZE_mm);
+public static final int FOCUS_SIZE = 220;
     public static final int CIRCLE_SIZE = 60;
     public static final double GAIN = 0.5;
     public static final int ERROR_DURATION = 3 * 1000; // Duration to keep the error visible
+    public static final Color END_CIRCLE_COLOR = COLORS.YELLOW;
+    public static final Color CURVE_COLOR = COLORS.BLACK;
 
     // Experiment
     private final Task task;
@@ -136,7 +142,6 @@ public class PanTaskPanel extends TaskPanel {
      * Show the active trial
      */
     private void showActiveTrial() {
-
         // Clear the viewport
         clearActiveLayer();
 
@@ -154,6 +159,10 @@ public class PanTaskPanel extends TaskPanel {
 
         // Set up the Logex for this trial
         Logex.get().activateTrial(activeTrial);
+
+        // Console
+        conLog.info("Trial level, rotation: {}, {}",
+                ((PanTrial) activeTrial).level, ((PanTrial) activeTrial).rotation);
     }
 
     /**

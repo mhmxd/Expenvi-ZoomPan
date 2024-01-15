@@ -128,6 +128,7 @@ public class ExperimentFrame extends JFrame {
                 // Close the dialog
                 infoDialog.setVisible(false);
                 taskPanel.setVisible(true);
+                taskPanel.requestFocus();
             });
         }
     };

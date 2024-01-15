@@ -21,9 +21,11 @@ public class Constants {
 
     //-- Colors
     public static class COLORS {
+        public static final Color BLACK = Color.BLACK;
         public static final Color GREEN = new Color(76, 175, 80);
         public static final Color RED = new Color(255, 0, 0);
-        public static final Color MAIN_BACKGROUND = Color.WHITE;
+//        public static final Color MAIN_BACKGROUND = Color.WHITE;
+        public static final Color YELLOW = new Color(227, 206, 23);
     }
 
     //-- Display properties

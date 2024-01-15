@@ -1,6 +1,8 @@
 package ui;
 
+import control.Logex;
 import enums.Task;
+import enums.TrialEvent;
 import listener.MooseListener;
 import model.BaseBlock;
 import model.ZoomTrial;
@@ -13,6 +15,7 @@ import tool.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.Duration;
 import java.util.Random;
 
 import static tool.Constants.*;
@@ -26,7 +29,7 @@ public class ZoomTaskPanel
     // Constants
     public static final int NUM_ZOOM_BLOCKS = 3;
     public static final int NUM_ZOOM_REPETITIONS = 3;
-    public static final int ZOOM_VP_SIZE_mm = 100;
+    public static final int ZOOM_VP_SIZE_mm = 200;
     public static final double WHEEL_STEP_SIZE = 0.25;
     public static final int ERROR_ROW = 1;
 
@@ -105,7 +108,6 @@ public class ZoomTaskPanel
      * Show the active trial
      */
     private void showActiveTrial() {
-
         // Clear the viewport (if added)
         if (getIndexOf(zoomViewPort) != -1) {
             remove(zoomViewPort);
@@ -123,6 +125,13 @@ public class ZoomTaskPanel
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         zoomViewPort.setVisible(true);
         add(zoomViewPort, JLayeredPane.PALETTE_LAYER);
+
+        // Inform Logex
+        Logex.get().activateTrial(activeTrial);
+
+        // Console
+        conLog.info("Trial from, to: {}, {}",
+                ((ZoomTrial) activeTrial).startLevel, ((ZoomTrial) activeTrial).endLevel);
     }
 
     /**
@@ -165,7 +174,21 @@ public class ZoomTaskPanel
     private final AbstractAction endTrialAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            conLog.trace("Trial Ended");
+            Logex.get().log(TrialEvent.SPACE_PRESS);
+            double enterToSpace = Duration.between(
+                    Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
+                    Logex.get().getTrialInstant(TrialEvent.SPACE_PRESS)).toMillis() / 1000.0;
+            double firstZoomToSpace = Duration.between(
+                    Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM),
+                    Logex.get().getTrialInstant(TrialEvent.SPACE_PRESS)).toMillis() / 1000.0;
+            double enterToLastZoom = Duration.between(
+                    Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
+                    Logex.get().getTrialInstant(TrialEvent.LAST_ZOOM)).toMillis() / 1000.0;
+            double firstZoomToLastZoom = Duration.between(
+                    Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM),
+                    Logex.get().getTrialInstant(TrialEvent.LAST_ZOOM)).toMillis() / 1000.0;
+            conLog.info("Times: {}, {}, {}, {}",
+                    enterToSpace, firstZoomToSpace, enterToLastZoom, firstZoomToLastZoom);
             nextTrial();
         }
     };

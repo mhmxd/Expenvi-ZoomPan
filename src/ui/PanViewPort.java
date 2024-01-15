@@ -21,11 +21,10 @@ import tool.Constants;
 import tool.Utils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.time.Duration;
@@ -35,8 +34,10 @@ import java.util.concurrent.TimeUnit;
 public class PanViewPort extends JPanel implements MouseListener, MouseMotionListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
+    //-- Trial
     private final PanTrial trial;
     private final AbstractAction endTrialAction; // Received from higher levels
+    private int nScansCurveInsideFocus, nScans;
 
     // View
     private final SVGIcon icon;
@@ -52,7 +53,36 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     private static final int startBorderSize = 100;
 
     private BufferedImage image;
-    private Stopwatch insideFocusStopwatch;
+    private final Stopwatch insideFocusStopwatch;
+
+    // Timers ---------------------------------------------------------------------------------
+    private final Timer borderBlinker = new Timer(200, new ActionListener() {
+        private Border currentBorder;
+        private int count = 0;
+        private final Border border1 = new LineBorder(Color.YELLOW, Constants.BORDERS.BORDER_THICKNESS);
+        private final Border border2 = new LineBorder(Color.RED, Constants.BORDERS.BORDER_THICKNESS);
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (count == 0) {
+                currentBorder = getBorder();
+            }
+
+            if (count % 2 == 0) {
+                setBorder(border1);
+            } else {
+                setBorder(border2);
+            }
+
+            count++;
+
+            if (count > 5) {
+                borderBlinker.stop();
+                setBorder(currentBorder);
+                count = 0;
+            }
+        }
+    });
 
     /**
      * Constructor
@@ -67,7 +97,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         trial = pt;
         endTrialAction = endTrAction;
 
-        // Creat the inside stopwatch
+        // Init
         insideFocusStopwatch = Stopwatch.createUnstarted();
 
         // Add the focus area
@@ -140,72 +170,8 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
                 focusArea.getHeight(),
                 null, 0, focusArea.getWidth());
 
-        //-- Check if the circle is *completely* inside the focus area
-        // Define four 'bands' around the area (scanSize = W -> scans row by row)
-        int[] outerBand1 = image.getRGB(
-                focusArea.getX() - Utils.mm2px(1),
-                focusArea.getY() - Utils.mm2px(1),
-                focusArea.getWidth() + Utils.mm2px(2),
-                Utils.mm2px(1),
-                null, 0, focusArea.getWidth() + Utils.mm2px(2));
-
-        int[] outerBand2 = image.getRGB(
-                focusArea.getX() + focusArea.getWidth(),
-                focusArea.getY(),
-                Utils.mm2px(2),
-                focusArea.getHeight(),
-                null, 0, Utils.mm2px(2));
-
-        int[] outerBand3 = image.getRGB(
-                focusArea.getX() - Utils.mm2px(1),
-                focusArea.getY() + focusArea.getHeight(),
-                focusArea.getWidth() + Utils.mm2px(2),
-                Utils.mm2px(2),
-                null, 0, focusArea.getWidth() + Utils.mm2px(2));
-
-        int[] outerBand4 = image.getRGB(
-                focusArea.getX() - Utils.mm2px(1),
-                focusArea.getY(),
-                Utils.mm2px(2),
-                focusArea.getHeight(),
-                null, 0, Utils.mm2px(2));
-
-        for (int c : focusAreaPixels) {
-            Color clr = new Color(c);
-            if (clr.equals(Color.BLUE)) { // At least one pixel of the circle is inside
-//                return true; // Uncomment for "the moment circle enters"
-
-                // Check so the circle is not in any of the four bands
-                if (!hasColor(outerBand1, Color.BLUE)
-                        && !hasColor(outerBand2, Color.BLUE)
-                        && !hasColor(outerBand3, Color.BLUE)
-                        && !hasColor(outerBand4, Color.BLUE)) {
-                    return true;
-                }
-
-            }
-        }
-
-        // Check if line is inside focus area
-        focusArea.setActive(false);
-        for (int c : focusAreaPixels) {
-            Color clr = new Color(c);
-            if (clr.equals(Color.BLACK)) {
-                focusArea.setActive(true);
-                logInsideFocus(); // LOG
-                return false;
-            }
-        }
-
-        logOutsideFocus();
-
-        // TODO: Check for the 10% time
-//        if (!insideFocusArea && panFocus.isActive()) {
-//            this.debugTimeNoPanningStart = System.currentTimeMillis();
-//            errorTrial();
-//        }
-
-        return false;
+        scanFocusAreaForCurve(focusAreaPixels);
+        return scanFocusAreaForLineEnd(focusAreaPixels);
     }
 
     /**
@@ -224,6 +190,53 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     }
 
     /**
+     * Scan the focus area for the curve
+     * @param focusPixels Array of the RGBA pixels
+     */
+    private void scanFocusAreaForCurve(int[] focusPixels) {
+        // Check if line is inside focus area
+        focusArea.setActive(false);
+        nScans++;
+        for (int c : focusPixels) {
+            Color clr = new Color(c);
+            if (clr.equals(Color.BLACK)) {
+                focusArea.setActive(true);
+                nScansCurveInsideFocus++;
+
+                logInsideFocus(); // LOG
+                return;
+            }
+        }
+
+        // No black was found
+        logOutsideFocus();
+    }
+
+    /**
+     * Scan the focus area for the end-circle color.
+     * The moment the color of the end circle is found, return.
+     * @param focusPixels Array of RGBA pixels
+     */
+    private boolean scanFocusAreaForLineEnd(int[] focusPixels) {
+        for (int c : focusPixels) {
+            Color clr = new Color(c);
+            if (clr.equals(PanTaskPanel.END_CIRCLE_COLOR)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check the accruacy (called AFTER finishing the trial)
+     * @return True (> 90% of the curved traversed inside the focus area)
+     */
+    private boolean wasTrialAccurate() {
+        return ((double) nScansCurveInsideFocus / nScans) >= 0.9;
+    }
+
+    /**
      * Translate the content inside by dX and dY
      * @param dX Delta-X
      * @param dY Delta-Y
@@ -239,16 +252,18 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // Check for the end of the trial
         SwingUtilities.invokeLater(() -> {
             if (isTrialFinished()) {
+                conLog.trace("FF, Now: {}, {}",
+                        Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
+                        Instant.now().toString());
                 Duration totalTrialDuration = Duration.between(
-                        Logex.get().getTrialInstant(TrialEvent.FIRST_PAN),
+                        Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
                         Instant.now());
 
-                // Inside focus time < 90% of the total time => error
-                if (insideFocusStopwatch.elapsed().dividedBy(totalTrialDuration) < 0.9) {
-                    ActionEvent endTrialEvent = new ActionEvent(
-                            this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT);
-                    endTrialAction.actionPerformed(endTrialEvent);
-                }
+                // < 90% of the curve traversed inside the focus area => error
+                ActionEvent endTrialEvent = (wasTrialAccurate())
+                        ? new ActionEvent(this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT)
+                        : new ActionEvent(this, TrialStatus.HIT, "");
+                endTrialAction.actionPerformed(endTrialEvent);
             }
         });
     }
@@ -353,7 +368,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mooseClicked(Memo e) {
-
+        borderBlinker.start();
     }
 
     @Override
@@ -384,12 +399,13 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
             // Start the stopwatch (if not already started)
             if (!insideFocusStopwatch.isRunning()) insideFocusStopwatch.start();
         }
+
+        conLog.trace("HasLogged: {}", Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER));
     }
 
     private void logOutsideFocus() {
         // If hasn't exited before or has entered before
-        if (!Logex.get().hasLoggedKey(TrialEvent.FOCUS_EXIT) ||
-                Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER)) {
+        if (Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER)) {
             Logex.get().log(TrialEvent.FOCUS_EXIT);
 
             // Start the stopwatch (if not already started)

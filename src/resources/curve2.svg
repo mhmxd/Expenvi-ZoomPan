@@ -1,10 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" text-rendering="geometricPrecision" shape-rendering="geometricPrecision"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 2600 1000"
-	 style="enable-background:new 0 0 2600 1000;" xml:space="preserve">
-<path style="fill:none;stroke:#000000;stroke-width:10;stroke-linecap:round;" d="M2500,500c-95.6,200-191.1,400-300.1,400
-	c-108.8,0-204.4-200-300.1-400s-191-400-299.9-400c-54.5,0-105.6,50-155.1,125c-49.5,75-144.8,275-144.8,275
-	c-95.6,200-191.1,400-300.1,400c-108.8,0-204.4-200-300.1-400s-191-400-299.9-400c-54.5,0-105.6,50-155.1,125S100,500,100,500"/>
-<path style="fill:#0000FF;" d="M2478,478c32.1-24.5,68.4,11.8,44,44C2489.8,546.4,2453.6,510.1,2478,478z"/>
+<svg width="2601" height="1000" viewBox="0 0 2601 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2500.39 500C2404.79 700 2309.29 900 2200.29 900C2091.49 900 1995.89 700 1900.19 500C1804.49 300 1709.19 100 1600.29 100C1545.79 100 1494.69 150 1445.19 225C1395.69 300 1300.39 500 1300.39 500C1204.79 700 1109.29 900 1000.29 900C891.494 900 795.894 700 700.194 500C604.494 300 509.194 100 400.294 100C345.794 100 294.694 150 245.194 225C195.694 300 100.394 500 100.394 500" stroke="black" stroke-width="10" stroke-linecap="round"/>
+<circle cx="2505.38" cy="491.221" r="4.98975" fill="#E3CE17"/>
 </svg>

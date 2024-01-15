@@ -31,13 +31,13 @@ public class TrialEvent {
     public static final String TRIAL_CLOSE = "trial_close";
 
     //-- Keys (used only inter communication) – for all the enter/exit pairs
-    public static final String MOVE = "MOVE";
-    public static final String VIEWPORT_ENTER = "VIEWPORT_ENTER";
-    public static final String ZOOM = "ZOOM";
-    public static final String PAN = "PAN";
-    public static final String FOCUS_ENTER = "FOCUS_ENTER";
-    public static final String FOCUS_EXIT = "FOCUS_EXIT";
-    public static final String VIEWPORT_EXIT = "VIEWPORT_EXIT";
+    public static final String MOVE = "move";
+    public static final String VIEWPORT_ENTER = "viewport_enter";
+    public static final String ZOOM = "zoom";
+    public static final String PAN = "pan";
+    public static final String FOCUS_ENTER = "focus_enter";
+    public static final String FOCUS_EXIT = "focus_exit";
+    public static final String VIEWPORT_EXIT = "viewport_exit";
 
     private String name = "";
     private Instant instant;
@@ -74,7 +74,7 @@ public class TrialEvent {
      * @return Event name of the last occurance
      */
     public static String getLastName(String key) {
-        return "LAST_" + key;
+        return "last_" + key;
     }
 
     /**
@@ -84,6 +84,6 @@ public class TrialEvent {
      * @return Event name of the first occurance
      */
     public static String getFirstName(String key) {
-        return "FIRST_" + key;
+        return "first_" + key;
     }
 }

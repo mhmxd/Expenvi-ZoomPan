@@ -40,6 +40,8 @@ public class Logex {
      */
     public void activateTrial(BaseTrial trial) {
         activeTrial = trial;
+        // Clear the log map
+        trialEvenLog.clear();
     }
 
     /**
@@ -58,13 +60,18 @@ public class Logex {
      * @param key Key from TrialEvent
      */
     public void log(String key) {
+        if (key == TrialEvent.TRIAL_OPEN || key == TrialEvent.TRIAL_CLOSE || key == TrialEvent.SPACE_PRESS) {
+            trialEvenLog.put(key, new TrialEvent(key));
+            return;
+        }
+
         String eventFirstName = TrialEvent.getFirstName(key);
         String eventLastName = TrialEvent.getLastName(key);
 
         // If first is empty, add first
         if (!trialEvenLog.containsKey(eventFirstName)) {
             trialEvenLog.put(eventFirstName, new TrialEvent(eventFirstName));
-            conLog.trace("Logged {}", eventFirstName);
+            conLog.trace("Logged {}, {}", eventFirstName, getTrialInstant(eventFirstName));
         }
 
         // Add last

@@ -104,7 +104,7 @@ public abstract class TrialFrame extends JFrame implements TrialListener {
 
         mainPanel.setBounds((width - size) / 2, 50, size, size);
         mainPanel.setBorder(border);
-        mainPanel.setBackground(COLORS.MAIN_BACKGROUND);
+        mainPanel.setBackground(COLORS.BLACK);
         mainPanel.setLayout(null);
         getContentPane().add(mainPanel);
         mainPanel.setVisible(true);

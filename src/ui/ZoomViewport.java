@@ -4,6 +4,8 @@ import com.kitfox.svg.*;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
+import control.Logex;
+import enums.TrialEvent;
 import listener.MooseListener;
 import model.ZoomTrial;
 import moose.Memo;
@@ -36,12 +38,12 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     private double mooseZoomStartLevel;
     private Boolean firstZoomInRightDirection;
     private boolean hasFocus;
-    private AbstractAction endTrialAction; // Received from higher levels
+    private final AbstractAction endTrialAction; // Received from higher levels
 
     // Tools
     private Robot robot;
-    private SVGIcon svgIcon;
-    private URI svgURI;
+    private final SVGIcon svgIcon;
+    private final URI svgURI;
 
 
     // Timers ---------------------------------------------------------------------------------
@@ -361,6 +363,9 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         // Repaint to reflect the changes
         repaint();
+
+        // LOG
+        Logex.get().log(TrialEvent.ZOOM);
     }
 
     @Override
@@ -382,17 +387,21 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     public void mouseEntered(MouseEvent e) {
         hasFocus = true;
         setBorder(BORDERS.FOCUSED_BORDER);
+
+        Logex.get().log(TrialEvent.FOCUS_ENTER);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         hasFocus = false;
         setBorder(BORDERS.FOCUS_LOST_BORDER);
+
+        Logex.get().log(TrialEvent.FOCUS_EXIT);
     }
 
     @Override
     public void mooseClicked(Memo e) {
-
+        borderBlinker.start();
     }
 
     @Override
@@ -440,6 +449,9 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         // Repaint the component to reflect the zooming
         repaint();
+
+        // LOG
+        Logex.get().log(TrialEvent.ZOOM);
     }
 
     @Override
