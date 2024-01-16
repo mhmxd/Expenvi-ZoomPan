@@ -1,6 +1,5 @@
 package tool;
 
-import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
@@ -8,15 +7,17 @@ public class Constants {
 
     //-- Borders
     public static class BORDERS {
-        public static final int BORDER_THICKNESS = 8;
+        public static final double THICKNESS_2_mm = 2;
+        public static final double THICKNESS_1_mm = 1;
+        public static final int THICKNESS_2 = Utils.mm2px(THICKNESS_2_mm);
+        public static final int THICKNESS_1 = Utils.mm2px(THICKNESS_1_mm);
 
-        public static final LineBorder BLACK_BORDER = new LineBorder(Color.BLACK, BORDER_THICKNESS);
+        public static final LineBorder BLACK_BORDER = new LineBorder(
+                Color.BLACK, THICKNESS_2);
         public static final LineBorder FOCUSED_BORDER = new LineBorder(
-                COLORS.GREEN,
-                BORDER_THICKNESS);
+                COLORS.GREEN, THICKNESS_2);
         public static final LineBorder FOCUS_LOST_BORDER = new LineBorder(
-                COLORS.RED,
-                BORDER_THICKNESS);
+                COLORS.RED, THICKNESS_2);
     }
 
     //-- Colors
@@ -30,8 +31,8 @@ public class Constants {
 
     //-- Display properties
     public static class DISP {
-//        public final static int PPI = 109;
-        public final static int PPI = 89;
+        public final static int PPI = 109;
+//        public final static int PPI = 89;
         public final static double INCH_MM = 25.4;
         public final static double LR_MARGIN_mm = 20; // (mm) Left-right margin
     }

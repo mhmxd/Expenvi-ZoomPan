@@ -1,13 +1,10 @@
 package ui;
 
-import com.google.common.base.Stopwatch;
 import control.Logex;
 import enums.Task;
 import enums.TrialStatus;
-import jdk.jshell.execution.Util;
 import model.BaseBlock;
 import model.PanTrial;
-import model.ZoomTrial;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
@@ -16,7 +13,6 @@ import tool.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,15 +25,11 @@ public class PanTaskPanel extends TaskPanel {
     // Constants
     public static final int NUM_PAN_BLOCKS = 1;
     public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
-    public static final int PAN_VP_SIZE_mm = 200;
-    public static final int FOCUS_SIZE_mm = 5;
-//    public static final int FOCUS_SIZE = Utils.mm2px(FOCUS_SIZE_mm);
-public static final int FOCUS_SIZE = 220;
-    public static final int CIRCLE_SIZE = 60;
+    public static final double VP_SIZE_mm = 200;
+    public static final double FOCUS_SIZE_mm = 0.3 * 200;
     public static final double GAIN = 0.5;
     public static final int ERROR_DURATION = 3 * 1000; // Duration to keep the error visible
-    public static final Color END_CIRCLE_COLOR = COLORS.YELLOW;
-    public static final Color CURVE_COLOR = COLORS.BLACK;
+    public static final Color END_CIRCLE_COLOR = COLORS.YELLOW; // Color should be matched to SVG
 
     // Experiment
     private final Task task;
@@ -63,7 +55,7 @@ public static final int FOCUS_SIZE = 220;
 
         startOnLeft = new Random().nextBoolean(); // Randomly choose whether to start traials on the left or right
         lrMargin = Utils.mm2px(ExperimentFrame.LR_MARGIN_MM);
-        pvpSize = Utils.mm2px(PAN_VP_SIZE_mm);
+        pvpSize = Utils.mm2px(VP_SIZE_mm);
 
         task = tsk;
         moose = ms;
@@ -146,7 +138,7 @@ public static final int FOCUS_SIZE = 220;
         clearActiveLayer();
 
         // Update prgogressLabel (trial/block)
-        progressLabel.setText("Trial: " + activeTrial.trialNum + "/" + "Block: " + activeTrial.blockId);
+        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
         progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial

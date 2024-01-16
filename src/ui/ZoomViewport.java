@@ -31,6 +31,8 @@ import static tool.Resources.*;
 public class ZoomViewport extends JPanel implements MouseListener, MouseWheelListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
+    private final int BLINKER_DELAY = 100; // ms
+
     private final ZoomTrial trial;
 
     private final boolean isZoomIn;
@@ -47,11 +49,11 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
 
     // Timers ---------------------------------------------------------------------------------
-    private final Timer borderBlinker = new Timer(200, new ActionListener() {
+    private final Timer borderBlinker = new Timer(BLINKER_DELAY, new ActionListener() {
         private Border currentBorder;
         private int count = 0;
-        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.BORDER_THICKNESS);
-        private final Border border2 = new LineBorder(Color.RED, BORDERS.BORDER_THICKNESS);
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.THICKNESS_2);
+        private final Border border2 = new LineBorder(Color.RED, BORDERS.THICKNESS_2);
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -289,7 +291,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         int scaleFactor = 1; // Always 1 (don't know why)
 
         // Calculate the scale
-        int insideWidth = width - 2 * BORDERS.BORDER_THICKNESS;
+        int insideWidth = width - 2 * BORDERS.THICKNESS_2;
         double svgDiagRectWidth = svgDiagram.getViewRect().getWidth();
         double scale = insideWidth / (svgDiagRectWidth / 200.0 + scaleFactor - zoomLevel) / 200;
         double x = (svgDiagram.getViewRect().getWidth() * scale / 2) - (width / 2.0);

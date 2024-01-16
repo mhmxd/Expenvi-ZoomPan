@@ -29,7 +29,7 @@ public class ZoomTaskPanel
     // Constants
     public static final int NUM_ZOOM_BLOCKS = 3;
     public static final int NUM_ZOOM_REPETITIONS = 3;
-    public static final int ZOOM_VP_SIZE_mm = 200;
+    public static final double VP_SIZE_mm = 200;
     public static final double WHEEL_STEP_SIZE = 0.25;
     public static final int ERROR_ROW = 1;
 
@@ -57,7 +57,7 @@ public class ZoomTaskPanel
         setLayout(null);
 
         startOnLeft = new Random().nextBoolean(); // Randomly choose whether to start traials on the left or right
-        zvpSize = Utils.mm2px(ZOOM_VP_SIZE_mm);
+        zvpSize = Utils.mm2px(VP_SIZE_mm);
         lrMargin = Utils.mm2px(ExperimentFrame.LR_MARGIN_MM);
 
         task = tsk;
@@ -115,7 +115,7 @@ public class ZoomTaskPanel
         }
 
         // Update prgogressLabel (trial/block)
-        progressLabel.setText("Trial: " + activeTrial.trialNum + "/" + "Block: " + activeTrial.blockId);
+        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
         progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial

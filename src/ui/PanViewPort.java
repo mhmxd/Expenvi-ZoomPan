@@ -17,7 +17,6 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import tool.Constants;
 import tool.Utils;
 
 import javax.swing.*;
@@ -29,10 +28,13 @@ import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
+
+import static tool.Constants.*;
 
 public class PanViewPort extends JPanel implements MouseListener, MouseMotionListener, MooseListener {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
+
+    private final int BLINKER_DELAY = 50; // ms
 
     //-- Trial
     private final PanTrial trial;
@@ -50,17 +52,18 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     private boolean isPanning;
     private static final int startPosX = 100;
     private static final int startPosY = 500;
-    private static final int startBorderSize = 100;
+//    private static final int startBorderSize = 100;
+    private final int focusAreaSize;
 
     private BufferedImage image;
     private final Stopwatch insideFocusStopwatch;
 
     // Timers ---------------------------------------------------------------------------------
-    private final Timer borderBlinker = new Timer(200, new ActionListener() {
+    private final Timer borderBlinker = new Timer(BLINKER_DELAY, new ActionListener() {
         private Border currentBorder;
         private int count = 0;
-        private final Border border1 = new LineBorder(Color.YELLOW, Constants.BORDERS.BORDER_THICKNESS);
-        private final Border border2 = new LineBorder(Color.RED, Constants.BORDERS.BORDER_THICKNESS);
+        private final Border border1 = new LineBorder(Color.YELLOW, BORDERS.THICKNESS_2);
+        private final Border border2 = new LineBorder(Color.RED, BORDERS.THICKNESS_2);
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -98,6 +101,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         endTrialAction = endTrAction;
 
         // Init
+        focusAreaSize = Utils.mm2px(PanTaskPanel.FOCUS_SIZE_mm);
         insideFocusStopwatch = Stopwatch.createUnstarted();
 
         // Add the focus area
@@ -275,7 +279,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         if (xDiff == null || yDiff == null) {
             int offsetX;
             int offsetY;
-            int offset = PanTaskPanel.FOCUS_SIZE / 2 + startBorderSize;
+            int offset = focusAreaSize / 2 + BORDERS.THICKNESS_2;
             if (rotate >= 0 && rotate < 90) {
                 offsetX = offset;
                 offsetY = -offset;
@@ -294,10 +298,10 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
             yDiff = getHeight() / 2 - startPosY + offsetY;
 
             focusArea.setBounds(
-                    getWidth() / 2 - PanTaskPanel.FOCUS_SIZE / 2, 
-                    getHeight() / 2 - PanTaskPanel.FOCUS_SIZE / 2,
-                    PanTaskPanel.FOCUS_SIZE,
-                    PanTaskPanel.FOCUS_SIZE);
+                    getWidth() / 2 - focusAreaSize / 2,
+                    getHeight() / 2 - focusAreaSize / 2,
+                    focusAreaSize,
+                    focusAreaSize);
             focusArea.setVisible(true);
 
             image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -330,7 +334,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // Change back the cursor and the border
         getParent().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         if (!hasFocus) {
-            setBorder(Constants.BORDERS.BLACK_BORDER);
+            setBorder(BORDERS.BLACK_BORDER);
         }
 
         isPanning = false;
@@ -339,13 +343,13 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     @Override
     public void mouseEntered(MouseEvent e) {
         hasFocus = true;
-        setBorder(Constants.BORDERS.FOCUSED_BORDER);
+        setBorder(BORDERS.FOCUSED_BORDER);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         hasFocus = false;
-        if (!isPanning) setBorder(Constants.BORDERS.BLACK_BORDER);
+        if (!isPanning) setBorder(BORDERS.BLACK_BORDER);
     }
 
     @Override

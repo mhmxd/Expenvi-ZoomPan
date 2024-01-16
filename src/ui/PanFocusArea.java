@@ -3,6 +3,8 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 
+import static tool.Constants.*;
+
 /**
  * A custom JPanel that represents a focus area. It can be either active or inactive.
  */
@@ -21,7 +23,7 @@ public class PanFocusArea extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(active ? Color.GREEN : Color.RED);
-        g2d.setStroke(new BasicStroke(4f));
+        g2d.setStroke(new BasicStroke(BORDERS.THICKNESS_1));
         g2d.drawRect(0, 0, getWidth(), getHeight());
         g2d.dispose();
     }
