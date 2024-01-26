@@ -24,7 +24,8 @@ public class PanTaskPanel extends TaskPanel {
 
     // Constants
     public static final int NUM_PAN_BLOCKS = 1;
-    public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
+    public static final int PAN_REP = 2;
+//    public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
     public static final double VP_SIZE_mm = 200;
     public static final double FOCUS_SIZE_mm = 0.3 * 200;
     public static final double GAIN = 0.5;
@@ -48,7 +49,7 @@ public class PanTaskPanel extends TaskPanel {
      * @param tsk Task – Type of the task
      */
     public PanTaskPanel(Dimension dim, Moose ms, Task tsk) {
-        super();
+        super(dim);
 
         setSize(dim);
         setLayout(null);
@@ -139,7 +140,7 @@ public class PanTaskPanel extends TaskPanel {
 
         // Update prgogressLabel (trial/block)
         progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
-        progressLabel.setVisible(true);
+//        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
         panViewPort = new PanViewPort(moose, (PanTrial) activeTrial, endTrialAction);

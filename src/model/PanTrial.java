@@ -23,4 +23,12 @@ public class PanTrial extends BaseTrial {
 
         this.rotation = rotation;
     }
+
+    @Override
+    public String toString() {
+        return "PanTrial{" +
+                "uri=" + uri +
+                ", rotation=" + rotation +
+                '}';
+    }
 }

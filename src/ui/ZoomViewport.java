@@ -341,11 +341,11 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             setBorder(BORDERS.FOCUSED_BORDER);
         }
 
-        // If the zoomFactor is at the maximum and user scrolls down (negative rotation), exit
+        // If the zoomLevel is at the maximum (100& zoomed-out) and user scrolls down (positive rotation), exit
         if (zoomLevel >= 35 + 1 && e.getWheelRotation() < 0) return;
 
-        // If the zoomFactor is at the minimum and user scrolls up (positive rotation), exit
-        if (this.zoomLevel <= 1 && e.getWheelRotation() > 0) return;
+        // If the zoomLevel is at the minimum (100% zoomed-in) and user scrolls up (negative rotation), exit
+        if (zoomLevel <= 1 && e.getWheelRotation() > 0) return;
 
         // If it's the first zoom and the direction is not determined, set the direction
         // TODO: Replace with time (instant)
@@ -358,10 +358,13 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         // Calculate the scale based on the step size and mouse wheel rotation
         // 1 Zoom-Level is 16 notches
-        double scale = ZoomTaskPanel.WHEEL_STEP_SIZE * e.getWheelRotation();
+//        double scale = ZoomTaskPanel.WHEEL_STEP_SIZE * e.getWheelRotation();
+
+        // Calculate the zoom level difference
+        double dZL = e.getWheelRotation() * ZoomTaskPanel.WHEEL_SCALE * zoomLevel;
 
         // Update the zoomFactor accordingly
-        this.zoomLevel -= scale;
+        this.zoomLevel -= dZL;
 
         // Repaint to reflect the changes
         repaint();

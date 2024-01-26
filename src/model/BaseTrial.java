@@ -15,4 +15,17 @@ abstract public class BaseTrial {
         this.finished = false;
         this.retries = 0;
     }
+
+    @Override
+    public String toString() {
+        return "BaseTrial{" +
+                "id=" + id +
+                ", task='" + task + '\'' +
+                ", blockId=" + blockId +
+                ", trialNum=" + trialNum +
+                ", level=" + level +
+                ", finished=" + finished +
+                ", retries=" + retries +
+                '}';
+    }
 }

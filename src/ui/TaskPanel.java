@@ -23,12 +23,14 @@ public class TaskPanel extends JLayeredPane {
     // UI
     JLabel progressLabel = new JLabel();
 
-    public TaskPanel() {
-        progressLabel.setBounds(2250, 50, 300, 30);
+    public TaskPanel(Dimension dim) {
+        conLog.trace("Width: {}", getWidth());
+        progressLabel.setBounds(dim.width - 300, 50, 300, 30);
         progressLabel.setFont(new Font(progressLabel.getFont().getFontName(), Font.PLAIN, 20));
         progressLabel.setVerticalAlignment(JLabel.CENTER);
         progressLabel.setHorizontalAlignment(JLabel.CENTER);
-        add(progressLabel, 1);
+        progressLabel.setVisible(true);
+        add(progressLabel, DEFAULT_LAYER);
     }
 
     protected void createBlocks() {

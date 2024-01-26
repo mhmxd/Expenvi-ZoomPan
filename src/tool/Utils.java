@@ -1,10 +1,23 @@
 package tool;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import static tool.Constants.*;
 
 public class Utils {
 
     private static final long MS_IN_DAY = 24 * 60 * 60 * 1000; // Milliseconds in a day
+
+    /**
+     * Returns a random int between the min (inclusive) and the bound (exclusive)
+     * @param min Minimum (inclusive)
+     * @param bound Bound (exclusive)
+     * @return Random int
+     */
+    public static int randInt(int min, int bound) {
+        if (bound <= min) return min;
+        else return ThreadLocalRandom.current().nextInt(min, bound);
+    }
 
     /**
      * mm to pixel

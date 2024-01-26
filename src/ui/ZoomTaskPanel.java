@@ -30,7 +30,8 @@ public class ZoomTaskPanel
     public static final int NUM_ZOOM_BLOCKS = 3;
     public static final int NUM_ZOOM_REPETITIONS = 3;
     public static final double VP_SIZE_mm = 200;
-    public static final double WHEEL_STEP_SIZE = 0.25;
+//    public static final double WHEEL_STEP_SIZE = 0.25;
+    public static final double WHEEL_SCALE = 0.1; // dZL = 1 notch x (WHEEL_SCALE x ZL)
     public static final int ERROR_ROW = 1;
 
     // Experiment
@@ -51,7 +52,7 @@ public class ZoomTaskPanel
      * @param tsk Task – Type of the task
      */
     public ZoomTaskPanel(Dimension dim, Moose ms, Task tsk) {
-        super();
+        super(dim);
 
         setSize(dim);
         setLayout(null);
@@ -116,7 +117,7 @@ public class ZoomTaskPanel
 
         // Update prgogressLabel (trial/block)
         progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
-        progressLabel.setVisible(true);
+//        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
         zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, endTrialAction);
@@ -124,7 +125,7 @@ public class ZoomTaskPanel
         Point position = findPositionForViewport(activeTrial.trialNum);
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         zoomViewPort.setVisible(true);
-        add(zoomViewPort, JLayeredPane.PALETTE_LAYER);
+        add(zoomViewPort, PALETTE_LAYER);
 
         // Inform Logex
         Logex.get().activateTrial(activeTrial);
