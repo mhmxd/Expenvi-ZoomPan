@@ -1,5 +1,6 @@
 package ui;
 
+import com.google.common.collect.Range;
 import com.kitfox.svg.*;
 import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
@@ -117,6 +118,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         super.setVisible(aFlag);
 
         if (aFlag) {
+
+
             int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
             Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
 
@@ -147,6 +150,14 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             startTrial(trial.startLevel, trial.endLevel, pointSet);
         }
     }
+
+    /**
+     * Calculate and return the list of (r,c) to set as target (make green)
+     * @return Set of (r,c)
+     */
+//    private Set<Pair<Integer, Integer>> getTargetElements(int endLevel) {
+//
+//    }
 
     /**
      * Start the trial
@@ -331,7 +342,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     // --------------------------------------------------------------------------------------------
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-
+        conLog.trace("Rotation = {}, {}", e.getWheelRotation(), e.getUnitsToScroll());
         // If not in focus, exit
         if (!hasFocus) return;
 
@@ -361,10 +372,15 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 //        double scale = ZoomTaskPanel.WHEEL_STEP_SIZE * e.getWheelRotation();
 
         // Calculate the zoom level difference
-        double dZL = e.getWheelRotation() * ZoomTaskPanel.WHEEL_SCALE * zoomLevel;
+//        double dZL = e.getWheelRotation() * (zoomLevel * ZoomTaskPanel.WHEEL_SCALE);
+//        double dZL = e.getWheelRotation() * ZoomTaskPanel.WHEEL_SCALE;
+        double dZL = e.getWheelRotation() * (ZoomTaskPanel.WHEEL_SCALE * 100 / zoomLevel);
+        conLog.trace("ZL {} + dZL {}", zoomLevel, dZL);
 
-        // Update the zoomFactor accordingly
-        this.zoomLevel -= dZL;
+        // Only update the zoomLevel if it stays inside the range [1, 35]
+        if (Range.closed(1.0, 35.0).contains(zoomLevel - dZL)) {
+            zoomLevel -= dZL;
+        }
 
         // Repaint to reflect the changes
         repaint();

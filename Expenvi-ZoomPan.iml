@@ -15,5 +15,6 @@
     <orderEntry type="library" name="tinylog.impl" level="project" />
     <orderEntry type="library" name="google.code.gson" level="project" />
     <orderEntry type="library" name="google.guava" level="project" />
+    <orderEntry type="library" name="jfree.svg" level="project" />
   </component>
 </module>

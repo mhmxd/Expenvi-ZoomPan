@@ -5,25 +5,25 @@ import enums.Task;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Utils;
-import ui.ExperimentFrame;
 import ui.PanTaskPanel;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 
 public class BaseBlock {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
+    public int blockNum;
     public final ArrayList<BaseTrial> trials = new ArrayList<>();
 
     /**
      * Constructor
-     * @param isModeZoomIn Is Zoom-In?
+     * @param blkNum Block number
+     * @param task Which task? (ZOOM-IN, ZOOM-OUT, PAN)
+     * @param repetition Number of repetitions (in each block)
      */
-    public BaseBlock(int blkId, Task task, int repetition) {
+    public BaseBlock(int blkNum, Task task, int repetition) {
+        blockNum = blkNum;
 
         switch (task) {
             case ZOOM_IN -> {
@@ -37,9 +37,9 @@ public class BaseBlock {
                     Collections.shuffle(trials);
 
                     for (int t = 0; t < trials.size(); t++) {
-                        trials.get(t).blockId = blkId;
+                        trials.get(t).blockNum = blkNum;
                         trials.get(t).trialNum = t + 1;
-                        trials.get(t).id = trials.get(t).blockId * 100 + trials.get(t).trialNum;
+                        trials.get(t).id = trials.get(t).blockNum * 100 + trials.get(t).trialNum;
                     }
                 }
             }
@@ -55,16 +55,16 @@ public class BaseBlock {
                 Collections.shuffle(trials);
 
                 for (int t = 0; t < trials.size(); t++) {
-                    trials.get(t).blockId = blkId;
+                    trials.get(t).blockNum = blkNum;
                     trials.get(t).trialNum = t + 1;
-                    trials.get(t).id = trials.get(t).blockId * 100 + trials.get(t).trialNum;
+                    trials.get(t).id = trials.get(t).blockNum * 100 + trials.get(t).trialNum;
                 }
 
             }
 
             case PAN -> {
                 // For each repetition: randomly choose the rotation for the short curve. Next two will be +120 and +240
-                for (int i = 0; i < PanTaskPanel.PAN_REP; i++) {
+                for (int i = 0; i < PanTaskPanel.NUM_REP_IN_BLOCK; i++) {
                     int rotation = Utils.randInt(0, 360);
                     trials.add(new PanTrial(1, rotation));
                     trials.add(new PanTrial(2, (rotation + 120) % 360)); // Go over the next rotation
@@ -81,9 +81,9 @@ public class BaseBlock {
 
         // Set the numbers and IDs
         for (int t = 0; t < trials.size(); t++) {
-            trials.get(t).blockId = blkId;
+            trials.get(t).blockNum = blkNum;
             trials.get(t).trialNum = t + 1;
-            trials.get(t).id = trials.get(t).blockId * 100 + trials.get(t).trialNum;
+            trials.get(t).id = trials.get(t).blockNum * 100 + trials.get(t).trialNum;
         }
 
     }
@@ -162,6 +162,18 @@ public class BaseBlock {
 
     public boolean isBlockFinished(int trNum) {
         return trNum >= trials.size();
+    }
+
+    public void reInsertTrial(int trNum) {
+        BaseTrial trial = trials.get(trNum - 1);
+        int randomIndex = Utils.randInt(trNum, trials.size());
+        conLog.info("New num: {}", randomIndex + 1);
+        trials.add(randomIndex, cloneTrial(trial));
+        // Refesh the nums
+        for (int i = 0; i < trials.size(); i++) {
+            trials.get(i).trialNum = i + 1;
+        }
+        conLog.info("List: {}", trials);
     }
 
     /**

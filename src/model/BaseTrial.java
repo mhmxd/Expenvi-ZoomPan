@@ -3,7 +3,7 @@ package model;
 abstract public class BaseTrial {
     public int id;
     public final String task;
-    public int blockId;
+    public int blockNum;
     public int trialNum;
     public final int level;
     public boolean finished;
@@ -21,7 +21,7 @@ abstract public class BaseTrial {
         return "BaseTrial{" +
                 "id=" + id +
                 ", task='" + task + '\'' +
-                ", blockId=" + blockId +
+                ", blockId=" + blockNum +
                 ", trialNum=" + trialNum +
                 ", level=" + level +
                 ", finished=" + finished +

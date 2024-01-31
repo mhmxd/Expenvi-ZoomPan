@@ -27,8 +27,8 @@ public class PanTrial extends BaseTrial {
     @Override
     public String toString() {
         return "PanTrial{" +
-                "uri=" + uri +
-                ", rotation=" + rotation +
+                id + " | " +
+                trialNum +
                 '}';
     }
 }

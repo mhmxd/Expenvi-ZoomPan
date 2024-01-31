@@ -24,12 +24,12 @@ public class PanTaskPanel extends TaskPanel {
 
     // Constants
     public static final int NUM_PAN_BLOCKS = 1;
-    public static final int PAN_REP = 2;
+    public static final int NUM_REP_IN_BLOCK = 2;
 //    public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
     public static final double VP_SIZE_mm = 200;
     public static final double FOCUS_SIZE_mm = 0.3 * 200;
     public static final double GAIN = 0.5;
-    public static final int ERROR_DURATION = 3 * 1000; // Duration to keep the error visible
+    public static final int ERROR_DURATION = 3 * 1000; // (ms) Duration to keep the error visible
     public static final Color END_CIRCLE_COLOR = COLORS.YELLOW; // Color should be matched to SVG
 
     // Experiment
@@ -125,7 +125,7 @@ public class PanTaskPanel extends TaskPanel {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                nextTrial();
+                endTrial(TrialStatus.ERROR);
             }
         }, ERROR_DURATION);
 
@@ -134,16 +134,18 @@ public class PanTaskPanel extends TaskPanel {
     /**
      * Show the active trial
      */
-    private void showActiveTrial() {
+    @Override
+    protected void showActiveTrial() {
+        conLog.info(activeTrial);
         // Clear the viewport
         clearActiveLayer();
 
         // Update prgogressLabel (trial/block)
-        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
+        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockNum);
 //        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
-        panViewPort = new PanViewPort(moose, (PanTrial) activeTrial, endTrialAction);
+        panViewPort = new PanViewPort(moose, (PanTrial) activeTrial, onFinishTrialAction);
         panViewPort.setBorder(BORDERS.BLACK_BORDER);
         Point position = findPositionForViewport(activeTrial.trialNum);
         panViewPort.setBounds(position.x, position.y, pvpSize, pvpSize);
@@ -181,26 +183,14 @@ public class PanTaskPanel extends TaskPanel {
         return position;
     }
 
-    @Override
-    protected void nextTrial() {
-        super.nextTrial();
-        conLog.trace("nextTrial");
-        if (activeBlock.isBlockFinished(activeTrial.trialNum)) { // Block finished
-
-        } else { // More trials in the block
-            activeTrial = activeBlock.getTrial(activeTrial.trialNum + 1);
-            showActiveTrial();
-        }
-
-    }
-
     // Actions -----------------------------------------------------------------------------------
-    private final AbstractAction endTrialAction = new AbstractAction() {
+    private final AbstractAction onFinishTrialAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            conLog.trace("Trial Ended");
+            conLog.info("Trial {} Ended", activeTrial.id);
             // There was an error
             if (e.getID() == TrialStatus.ERROR) {
+                conLog.info("Error");
                 // Curve was out more than 10% of the time
                 if (e.getActionCommand() == TrialStatus.TEN_PERCENT_OUT) {
                     conLog.error("Trial Error: {}", e.getActionCommand());
@@ -208,8 +198,11 @@ public class PanTaskPanel extends TaskPanel {
                     showError("The curve must not be outside for more than 10% of the time!");
                 }
             } else {
-                nextTrial();
+                conLog.info("Hit");
+                endTrial(TrialStatus.HIT);
             }
+
+            conLog.info("--------------------------");
         }
     };
 }

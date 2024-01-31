@@ -1,14 +1,19 @@
 package ui;
 
+import enums.TrialStatus;
 import model.BaseBlock;
 import model.BaseTrial;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
+import tool.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
+import static tool.Constants.*;
 /***
  * JlayeredPane to use indexes for objects
  */
@@ -22,6 +27,7 @@ public class TaskPanel extends JLayeredPane {
 
     // UI
     JLabel progressLabel = new JLabel();
+    JLabel endTaskLabel = new JLabel();
 
     public TaskPanel(Dimension dim) {
         conLog.trace("Width: {}", getWidth());
@@ -29,8 +35,7 @@ public class TaskPanel extends JLayeredPane {
         progressLabel.setFont(new Font(progressLabel.getFont().getFontName(), Font.PLAIN, 20));
         progressLabel.setVerticalAlignment(JLabel.CENTER);
         progressLabel.setHorizontalAlignment(JLabel.CENTER);
-        progressLabel.setVisible(true);
-        add(progressLabel, DEFAULT_LAYER);
+//        progressLabel.setVisible(true);
     }
 
     protected void createBlocks() {
@@ -49,11 +54,76 @@ public class TaskPanel extends JLayeredPane {
      * Show a trial
      */
     protected void startBlock() {
+        for (Component c : getComponentsInLayer(JLayeredPane.DEFAULT_LAYER)) {
+            remove(c);
+            repaint();
+        }
+
+        add(progressLabel, DEFAULT_LAYER);
+
         // Implemented by the subclasses
     }
 
 
-    protected void nextTrial() {
+    protected void endTrial(int status) {
+        if (status == TrialStatus.HIT) {
+            if (activeBlock.isBlockFinished(activeTrial.trialNum)) { // Block finished -> show break|end
+                conLog.info("Block Finished");
+                endBlock(); // Got to the next block (checks are done inside that method)
+            } else { // More trials in the block
+                activeTrial = activeBlock.getTrial(activeTrial.trialNum + 1);
+                showActiveTrial();
+            }
+        } else { // Error
+            // Re-insert the trial into the rest randomly, then get the next one
+            activeBlock.reInsertTrial(activeTrial.trialNum);
+            activeTrial = activeBlock.getTrial(activeTrial.trialNum + 1);
+            showActiveTrial();
+        }
+    }
+
+    protected void endBlock() {
+        if (blocks.size() == activeBlock.blockNum) { // No more blocks
+            conLog.info("Task Ended!");
+            endTask();
+        } else { // More blocks -> show break -> (action) next block
+            showBreak();
+        }
+    }
+
+    protected void showActiveTrial() {
 
     }
+
+    protected void showBreak() {
+        BreakPanel breakPanel = new BreakPanel(getSize(), onEndBreakAction);
+        removeAll();
+        add(breakPanel, DEFAULT_LAYER);
+        repaint();
+    }
+
+    protected void endTask() {
+        endTaskLabel.setText("Task finished. Thank You!");
+        endTaskLabel.setFont(new Font("Roboto", Font.BOLD, 50));
+        endTaskLabel.setForeground(COLORS.BLACK);
+        endTaskLabel.setSize(700, 50);
+        endTaskLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        endTaskLabel.setVerticalAlignment(SwingConstants.CENTER);
+        int centX = (getWidth() - endTaskLabel.getWidth()) / 2;
+        int centY = (getHeight() - endTaskLabel.getHeight()) / 2;
+        endTaskLabel.setBounds(centX, centY, endTaskLabel.getWidth(), endTaskLabel.getWidth());
+
+        removeAll();
+        add(endTaskLabel, DEFAULT_LAYER);
+        repaint();
+    }
+
+    private final AbstractAction onEndBreakAction = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            conLog.trace("Break Ended");
+            activeBlock = blocks.get(activeBlock.blockNum);
+            startBlock();
+        }
+    };
 }

@@ -3,6 +3,7 @@ package ui;
 import control.Logex;
 import enums.Task;
 import enums.TrialEvent;
+import enums.TrialStatus;
 import listener.MooseListener;
 import model.BaseBlock;
 import model.ZoomTrial;
@@ -31,8 +32,10 @@ public class ZoomTaskPanel
     public static final int NUM_ZOOM_REPETITIONS = 3;
     public static final double VP_SIZE_mm = 200;
 //    public static final double WHEEL_STEP_SIZE = 0.25;
-    public static final double WHEEL_SCALE = 0.1; // dZL = 1 notch x (WHEEL_SCALE x ZL)
+    public static final double WHEEL_SCALE = 0.07; // Based on Windows 10
     public static final int ERROR_ROW = 1;
+    public static final int GRID_SIZE = 51; // Grid = 51 x 51 elements
+    public static final int GRID_TOL = 1; // Tolerance (1 row before and after the target is colored)
 
     // Experiment
     private final Task task;
@@ -108,7 +111,8 @@ public class ZoomTaskPanel
     /**
      * Show the active trial
      */
-    private void showActiveTrial() {
+    @Override
+    protected void showActiveTrial() {
         // Clear the viewport (if added)
         if (getIndexOf(zoomViewPort) != -1) {
             remove(zoomViewPort);
@@ -116,7 +120,7 @@ public class ZoomTaskPanel
         }
 
         // Update prgogressLabel (trial/block)
-        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockId);
+        progressLabel.setText("Trial: " + activeTrial.trialNum + " – " + "Block: " + activeTrial.blockNum);
 //        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
@@ -158,19 +162,6 @@ public class ZoomTaskPanel
         return position;
     }
 
-    @Override
-    protected void nextTrial() {
-        super.nextTrial();
-        conLog.trace("nextTrial");
-        if (activeBlock.isBlockFinished(activeTrial.trialNum)) { // Block finished
-
-        } else { // More trials in the block
-            activeTrial = activeBlock.getTrial(activeTrial.trialNum + 1);
-            showActiveTrial();
-        }
-
-    }
-
     // Actions -----------------------------------------------------------------------------------
     private final AbstractAction endTrialAction = new AbstractAction() {
         @Override
@@ -190,7 +181,7 @@ public class ZoomTaskPanel
                     Logex.get().getTrialInstant(TrialEvent.LAST_ZOOM)).toMillis() / 1000.0;
             conLog.info("Times: {}, {}, {}, {}",
                     enterToSpace, firstZoomToSpace, enterToLastZoom, firstZoomToLastZoom);
-            nextTrial();
+            endTrial(TrialStatus.HIT);
         }
     };
 
