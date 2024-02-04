@@ -26,7 +26,11 @@ public class Constants {
         public static final Color GREEN = new Color(76, 175, 80);
         public static final Color RED = new Color(255, 0, 0);
 //        public static final Color MAIN_BACKGROUND = Color.WHITE;
-        public static final Color YELLOW = new Color(227, 206, 23);
+        public static final Color YELLOW = new Color(255, 241, 118);
+
+        public static String getHex(Color c) {
+            return "#" + Integer.toHexString(c.getRGB()).substring(2);
+        }
     }
 
     //-- Display properties

@@ -1,5 +1,6 @@
 package tool;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tool.Constants.*;
@@ -17,6 +18,28 @@ public class Utils {
     public static int randInt(int min, int bound) {
         if (bound <= min) return min;
         else return ThreadLocalRandom.current().nextInt(min, bound);
+    }
+
+    public static int getMinXFromList(List<MoCoord> list) {
+        if (list == null || list.isEmpty()) return -1;
+
+        int min = list.get(0).x;
+        for (MoCoord p : list) {
+            if (p.x < min) min = p.x;
+        }
+
+        return min;
+    }
+
+    public static int getMaxXFromList(List<MoCoord> list) {
+        if (list == null || list.isEmpty()) return -1;
+
+        int max = list.get(0).x;
+        for (MoCoord p : list) {
+            if (p.x > max) max = p.x;
+        }
+
+        return max;
     }
 
     /**

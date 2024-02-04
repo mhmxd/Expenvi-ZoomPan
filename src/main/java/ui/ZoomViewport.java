@@ -13,18 +13,21 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
+import tool.MoCoord;
 import tool.MoKey;
 import tool.Pair;
+import tool.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.*;
 
 import static tool.Constants.*;
 import static tool.Resources.*;
@@ -90,7 +93,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         endTrialAction = endTrAction;
         isZoomIn = Objects.equals(trial.task, "ZoomIn");
 
-        svgURI = isZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
+//        svgURI = isZoomIn ? SVG.ZOOM_IN_URI : SVG.ZOOM_OUT_URI;
+        svgURI = Paths.get(ZoomTaskPanel.ZOOM_OUT_SVG_FILE_NAME).toUri();
 
         svgIcon = new SVGIcon();
         svgIcon.setAntiAlias(true);
@@ -119,45 +123,152 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         if (aFlag) {
 
+            // Find the target elements (to be colored green)
+            ArrayList<MoCoord> targetElements = findTargetElements();
+            conLog.trace(targetElements);
+//            startTrial(trial.startLevel, trial.endLevel, findTargetElements());
 
-            int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
-            Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
+            // Remove the SVG document from the cache to prepare for reloading
+            SVGCache.getSVGUniverse().removeDocument(svgURI);
 
-            if (isZoomIn) {
-                for (int i = temp; i <= 35 - temp + 1; i++) {
-                    pointSet.add(Pair.create(temp, i));
-                    pointSet.add(Pair.create(temp + 1, i));
-                    pointSet.add(Pair.create(35 - temp + 1, i));
-                    pointSet.add(Pair.create(35 - temp + 1 - 1, i));
-                    pointSet.add(Pair.create(i, temp));
-                    pointSet.add(Pair.create(i, temp + 1));
-                    pointSet.add(Pair.create(i, 35 - temp + 1));
-                    pointSet.add(Pair.create(i, 35 - temp + 1 - 1));
-                }
-            } else {
-                for (int i = temp - 1; i <= 35 - temp + 1 + 1; i++) {
-                    pointSet.add(Pair.create(temp - 1, i));
-                    pointSet.add(Pair.create(temp, i));
-                    pointSet.add(Pair.create(35 - temp + 1, i));
-                    pointSet.add(Pair.create(35 - temp + 1 + 1, i));
-                    pointSet.add(Pair.create(i, temp));
-                    pointSet.add(Pair.create(i, temp - 1));
-                    pointSet.add(Pair.create(i, 35 - temp + 1));
-                    pointSet.add(Pair.create(i, 35 - temp + 1 + 1));
-                }
-            }
+            // Set up the SVG
+            svgIcon.setSvgURI(svgURI);
+            SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(svgURI);
+            SVGRoot root = diagram.getRoot();
 
-            startTrial(trial.startLevel, trial.endLevel, pointSet);
+            // Color different parts
+            colorTargetElements(root, targetElements);
+            colorErrorElements(root, targetElements);
+
+
+//            int temp = (int) Math.ceil(trial.endLevel / 2f) - (isZoomIn ? 1 : 0);
+//            Set<Pair<Integer, Integer>> pointSet = new HashSet<>();
+//
+//            if (isZoomIn) {
+//                for (int i = temp; i <= 35 - temp + 1; i++) {
+//                    pointSet.add(Pair.create(temp, i));
+//                    pointSet.add(Pair.create(temp + 1, i));
+//                    pointSet.add(Pair.create(35 - temp + 1, i));
+//                    pointSet.add(Pair.create(35 - temp + 1 - 1, i));
+//                    pointSet.add(Pair.create(i, temp));
+//                    pointSet.add(Pair.create(i, temp + 1));
+//                    pointSet.add(Pair.create(i, 35 - temp + 1));
+//                    pointSet.add(Pair.create(i, 35 - temp + 1 - 1));
+//                }
+//            } else {
+//                for (int i = temp - 1; i <= 35 - temp + 1 + 1; i++) {
+//                    pointSet.add(Pair.create(temp - 1, i));
+//                    pointSet.add(Pair.create(temp, i));
+//                    pointSet.add(Pair.create(35 - temp + 1, i));
+//                    pointSet.add(Pair.create(35 - temp + 1 + 1, i));
+//                    pointSet.add(Pair.create(i, temp));
+//                    pointSet.add(Pair.create(i, temp - 1));
+//                    pointSet.add(Pair.create(i, 35 - temp + 1));
+//                    pointSet.add(Pair.create(i, 35 - temp + 1 + 1));
+//                }
+//            }
+
+
         }
     }
 
     /**
-     * Calculate and return the list of (r,c) to set as target (make green)
-     * @return Set of (r,c)
+     * Color the target elements (green)
+     * @param root Root of the SVG
+     * @param targetElements List of the target elements
      */
-//    private Set<Pair<Integer, Integer>> getTargetElements(int endLevel) {
-//
-//    }
+    private void colorTargetElements(SVGRoot root, ArrayList<MoCoord> targetElements) {
+        // Update the fill color of specific SVG elements based on the given points
+        for (MoCoord p : targetElements) {
+            String id = "r" + p.x + "_c" + p.y;
+            colorSVGElement(root, id, COLORS.GREEN);
+        }
+    }
+
+    /**
+     * Color the error elements (black)
+     * @param root SVG root
+     * @param targetElements List of the target elements
+     */
+    private void colorErrorElements(SVGRoot root, ArrayList<MoCoord> targetElements) {
+        // Find the min and max in targetElements
+        int minTargetLimit = Utils.getMinXFromList(targetElements);
+        int maxTargetLimit = Utils.getMaxXFromList(targetElements);
+
+        for (int r = 1; r <= ZoomTaskPanel.GRID_SIZE; r++) {
+            for (int c = 1; c <= ZoomTaskPanel.GRID_SIZE; c++) {
+                if (r < minTargetLimit || c < minTargetLimit || r > maxTargetLimit || c > maxTargetLimit) {
+                    String id = "r" + r + "_c" + c;
+                    colorSVGElement(root, id, COLORS.BLACK);
+                }
+            }
+        }
+    }
+
+    /**
+     * Color an SVG element
+     * @param root SVG root
+     * @param id Id of the element
+     */
+    private void colorSVGElement(SVGRoot root, String id, Color color) {
+        SVGElement element = root.getChild(id);
+        try {
+            if (element != null) {
+                element.setAttribute("fill", AnimationElement.AT_XML, COLORS.getHex(color));
+            }
+        } catch (SVGException ignored) {
+        }
+    }
+
+    /**
+     * Calculate and return the list of (r,c) to set as target
+     * @return Map (keys: rows, values: cols)
+     */
+    private ArrayList<MoCoord> findTargetElements() {
+        ArrayList<MoCoord> elements = new ArrayList<>();
+
+        final int TOL = ZoomTaskPanel.GRID_TOL;
+        final int LAST = ZoomTaskPanel.GRID_SIZE;
+        conLog.info("Trial: {}", trial);
+
+        // Top side
+        int leftmostCol = Math.max(1, trial.endLevel - TOL);
+        int rightmostCol = LAST - (trial.endLevel - 1) + 1; // -1 is bc ZLs start from 1
+        int topmostRow = Math.max(1, trial.endLevel - TOL);
+        int topRow = trial.endLevel + TOL;
+        for (int row = topmostRow; row <= topRow; row++) {
+            for (int col = leftmostCol; col <= rightmostCol; col++) {
+                elements.add(new MoCoord(row, col));
+            }
+        }
+
+        // Right side
+        int rightCol = LAST - (trial.endLevel - 1) - TOL;
+        int lowermostRow = Math.min(LAST, LAST - (trial.endLevel - 1) + TOL);
+        for (int row = topmostRow; row <= lowermostRow; row++) {
+            for (int col = rightCol; col <= rightmostCol; col++) {
+                elements.add(new MoCoord(row, col));
+            }
+        }
+
+        // Bottom side
+        int lowerRow = LAST - (trial.endLevel - 1) - TOL;
+        for (int row = lowerRow; row <= lowermostRow; row++) {
+            for (int col = leftmostCol; col <= rightmostCol; col++) {
+                elements.add(new MoCoord(row, col));
+            }
+        }
+
+        // Left side
+        int leftCol = trial.endLevel + TOL;
+        for (int row = topmostRow; row <= lowermostRow; row++) {
+            for (int col = leftmostCol; col <= leftCol; col++) {
+                elements.add(new MoCoord(row, col));
+            }
+        }
+
+        return elements;
+    }
 
     /**
      * Start the trial

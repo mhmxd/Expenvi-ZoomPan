@@ -4,6 +4,7 @@ import listener.TrialListener;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
+
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
 
@@ -12,7 +13,7 @@ import javax.swing.event.EventListenerList;
  * Temporary name
  */
 public abstract class TrialPanel extends JPanel {
-    private TaggedLogger conLog = Logger.tag("TrialPanel");
+    private final TaggedLogger conLog = Logger.tag("TrialPanel");
 
     private final EventListenerList listeners;
     private boolean focus;

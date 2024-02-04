@@ -5,7 +5,9 @@ import enums.Task;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Utils;
+import ui.ExperimentFrame;
 import ui.PanTaskPanel;
+import ui.ZoomTaskPanel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,10 +48,14 @@ public class BaseBlock {
 
             case ZOOM_OUT -> {
 
+                int START_LEVEL = ZoomTaskPanel.GRID_SIZE / 2 + 1; // Central circle
                 for (int j = 0; j < repetition; j++) {
-                    trials.add(new ZoomTrial("ZoomOut", 1, 35, 29));
-                    trials.add(new ZoomTrial("ZoomOut", 2, 35, 23));
-                    trials.add(new ZoomTrial("ZoomOut", 3, 35, 17));
+                    trials.add(new ZoomTrial("ZoomOut", 1,
+                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[0]));
+                    trials.add(new ZoomTrial("ZoomOut", 2,
+                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[1]));
+                    trials.add(new ZoomTrial("ZoomOut", 3,
+                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[2]));
                 }
 
                 Collections.shuffle(trials);
@@ -160,20 +166,28 @@ public class BaseBlock {
         else return cloneTrial(trials.get(trNum - 1));
     }
 
+    /**
+     * Is the block finished?
+     * @param trNum Trial number
+     * @return True (trNum was the last number) or False
+     */
     public boolean isBlockFinished(int trNum) {
         return trNum >= trials.size();
     }
 
+    /**
+     * Re-insert a trial into the rest
+     * @param trNum Trial number
+     */
     public void reInsertTrial(int trNum) {
         BaseTrial trial = trials.get(trNum - 1);
         int randomIndex = Utils.randInt(trNum, trials.size());
-        conLog.info("New num: {}", randomIndex + 1);
         trials.add(randomIndex, cloneTrial(trial));
+
         // Refesh the nums
         for (int i = 0; i < trials.size(); i++) {
             trials.get(i).trialNum = i + 1;
         }
-        conLog.info("List: {}", trials);
     }
 
     /**

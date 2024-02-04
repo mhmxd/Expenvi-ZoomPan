@@ -11,6 +11,7 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
+import tool.MoSVG;
 import tool.Utils;
 
 import javax.swing.*;
@@ -30,12 +31,17 @@ public class ZoomTaskPanel
     // Constants
     public static final int NUM_ZOOM_BLOCKS = 3;
     public static final int NUM_ZOOM_REPETITIONS = 3;
-    public static final double VP_SIZE_mm = 200;
+    public static final double VIEWPPORT_SIZE_mm = 200;
 //    public static final double WHEEL_STEP_SIZE = 0.25;
     public static final double WHEEL_SCALE = 0.07; // Based on Windows 10
     public static final int ERROR_ROW = 1;
-    public static final int GRID_SIZE = 51; // Grid = 51 x 51 elements
+
+    public static final int GRID_SIZE = 51; // Grid # elements in rows = columns
+    public static final int GRID_GUTTER = 30; // Space between elements
+    public static final int GRID_ELEMENT_SIZE = 100; // Diameter/W of the grid elements
     public static final int GRID_TOL = 1; // Tolerance (1 row before and after the target is colored)
+
+    public static final String ZOOM_OUT_SVG_FILE_NAME = "zoom_out.svg";
 
     // Experiment
     private final Task task;
@@ -61,13 +67,19 @@ public class ZoomTaskPanel
         setLayout(null);
 
         startOnLeft = new Random().nextBoolean(); // Randomly choose whether to start traials on the left or right
-        zvpSize = Utils.mm2px(VP_SIZE_mm);
+        zvpSize = Utils.mm2px(VIEWPPORT_SIZE_mm);
         lrMargin = Utils.mm2px(ExperimentFrame.LR_MARGIN_MM);
 
         task = tsk;
         moose = ms;
 
         createBlocks();
+
+        // Test generating SVG
+        MoSVG.genCircleGrid(
+                ZOOM_OUT_SVG_FILE_NAME,
+                GRID_SIZE, GRID_ELEMENT_SIZE, GRID_GUTTER,
+                COLORS.YELLOW);
 
 //        addMouseListener(this);
 //        addMouseMotionListener(this);
