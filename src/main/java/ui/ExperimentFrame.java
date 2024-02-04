@@ -19,7 +19,8 @@ public class ExperimentFrame extends JFrame {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     public static String pID = "100";
-    public static int[] ZO_DIST_LIST = new int[]{12, 15, 20};
+    public static int[] ZO_TARGET_LEVELS = new int[]{12, 15, 20};
+    public static int[] ZI_TARGET_LEVELS = new int[]{20, 15, 12};
 
     public static double LR_MARGIN_MM = 20.0;
 

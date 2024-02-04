@@ -30,11 +30,11 @@ public class BaseBlock {
         switch (task) {
             case ZOOM_IN -> {
 
+                int START_LEVEL = 1; // Outer ring
                 for (int j = 0; j < repetition; j++) {
-
-                    trials.add(new ZoomTrial("ZoomIn", 1, 27, 33));
-                    trials.add(new ZoomTrial("ZoomIn", 2, 21, 33));
-                    trials.add(new ZoomTrial("ZoomIn", 3, 15, 33));
+                    for (int lvl : ExperimentFrame.ZI_TARGET_LEVELS) {
+                        trials.add(new ZoomTrial(Task.ZOOM_IN, START_LEVEL, lvl));
+                    }
 
                     Collections.shuffle(trials);
 
@@ -49,13 +49,8 @@ public class BaseBlock {
             case ZOOM_OUT -> {
 
                 int START_LEVEL = ZoomTaskPanel.GRID_SIZE / 2 + 1; // Central circle
-                for (int j = 0; j < repetition; j++) {
-                    trials.add(new ZoomTrial("ZoomOut", 1,
-                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[0]));
-                    trials.add(new ZoomTrial("ZoomOut", 2,
-                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[1]));
-                    trials.add(new ZoomTrial("ZoomOut", 3,
-                            START_LEVEL, START_LEVEL - ExperimentFrame.ZO_DIST_LIST[2]));
+                for (int lvl : ExperimentFrame.ZO_TARGET_LEVELS) {
+                    trials.add(new ZoomTrial(Task.ZOOM_IN, START_LEVEL, lvl));
                 }
 
                 Collections.shuffle(trials);

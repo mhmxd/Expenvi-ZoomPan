@@ -11,6 +11,7 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
+import tool.MoCoord;
 import tool.MoSVG;
 import tool.Utils;
 
@@ -18,6 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Random;
 
 import static tool.Constants.*;
@@ -34,12 +36,11 @@ public class ZoomTaskPanel
     public static final double VIEWPPORT_SIZE_mm = 200;
 //    public static final double WHEEL_STEP_SIZE = 0.25;
     public static final double WHEEL_SCALE = 0.07; // Based on Windows 10
-    public static final int ERROR_ROW = 1;
+    public static final int TOLERANCE = 1; // Tolerance (1 row before and after the target is colored)
 
     public static final int GRID_SIZE = 51; // Grid # elements in rows = columns
     public static final int GRID_GUTTER = 30; // Space between elements
     public static final int GRID_ELEMENT_SIZE = 100; // Diameter/W of the grid elements
-    public static final int GRID_TOL = 1; // Tolerance (1 row before and after the target is colored)
 
     public static final String ZOOM_OUT_SVG_FILE_NAME = "zoom_out.svg";
 
@@ -50,8 +51,9 @@ public class ZoomTaskPanel
     private final int zvpSize; // Size of the viewport in px
     private final int lrMargin; // Left-right margin in px (mm comes from ExperimentFrame)
 
-    // Viewport
+    // View
     private ZoomViewport zoomViewPort;
+    private final ArrayList<MoCoord> zoomElements = new ArrayList<>(); // Hold the grid coords + ids
 
     // -------------------------------------------------------------------------------------------
     /**
@@ -75,11 +77,18 @@ public class ZoomTaskPanel
 
         createBlocks();
 
-        // Test generating SVG
+        // Generate the zooming SVG
         MoSVG.genCircleGrid(
                 ZOOM_OUT_SVG_FILE_NAME,
                 GRID_SIZE, GRID_ELEMENT_SIZE, GRID_GUTTER,
                 COLORS.YELLOW);
+
+        // Add the elements to the list (done once)
+        for (int r = 1; r <= GRID_SIZE; r++) {
+            for (int c = 1; c <= GRID_SIZE; c++) {
+                zoomElements.add(new MoCoord(r, c, String.format("r%d_c%d", r, c)));
+            }
+        }
 
 //        addMouseListener(this);
 //        addMouseMotionListener(this);
@@ -136,7 +145,7 @@ public class ZoomTaskPanel
 //        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
-        zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, endTrialAction);
+        zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, zoomElements, endTrialAction);
         zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
         Point position = findPositionForViewport(activeTrial.trialNum);
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);

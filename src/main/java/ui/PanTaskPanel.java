@@ -154,10 +154,6 @@ public class PanTaskPanel extends TaskPanel {
 
         // Set up the Logex for this trial
         Logex.get().activateTrial(activeTrial);
-
-        // Console
-        conLog.info("Trial level, rotation: {}, {}",
-                ((PanTrial) activeTrial).level, ((PanTrial) activeTrial).rotation);
     }
 
     /**

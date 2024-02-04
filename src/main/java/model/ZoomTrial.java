@@ -1,11 +1,13 @@
 package model;
 
+import enums.Task;
+
 public class ZoomTrial extends BaseTrial {
     public final int startLevel;
     public final int endLevel;
 
-    public ZoomTrial(String task, int level, int startLevel, int endLevel) {
-        super(task, level);
+    public ZoomTrial(Task task, int startLevel, int endLevel) {
+        super(task);
 
         this.startLevel = startLevel;
         this.endLevel = endLevel;
