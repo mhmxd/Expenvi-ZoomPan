@@ -3,14 +3,14 @@ package model;
 import enums.Task;
 
 public class ZoomTrial extends BaseTrial {
-    public final int startLevel;
-    public final int endLevel;
+    public final int startNotch;
+    public final int targetNotch;
 
-    public ZoomTrial(Task task, int startLevel, int endLevel) {
+    public ZoomTrial(Task task, int startNotch, int targetNotch) {
         super(task);
 
-        this.startLevel = startLevel;
-        this.endLevel = endLevel;
+        this.startNotch = startNotch;
+        this.targetNotch = targetNotch;
     }
 
     @Override
@@ -20,8 +20,8 @@ public class ZoomTrial extends BaseTrial {
                 ", task='" + task + '\'' +
                 ", blockNum=" + blockNum +
                 ", trialNum=" + trialNum +
-                " startLevel=" + startLevel +
-                ", endLevel=" + endLevel +
+                " startNotch=" + startNotch +
+                ", targetNotch=" + targetNotch +
                 '}';
     }
 }

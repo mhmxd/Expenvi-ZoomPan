@@ -1,5 +1,6 @@
 package tool;
 
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
@@ -27,6 +28,7 @@ public class Constants {
         public static final Color RED = new Color(255, 0, 0);
 //        public static final Color MAIN_BACKGROUND = Color.WHITE;
         public static final Color YELLOW = new Color(255, 241, 118);
+        public static final Color BLUE = new Color(100, 181, 246);
 
         public static String getHex(Color c) {
             return "#" + Integer.toHexString(c.getRGB()).substring(2);

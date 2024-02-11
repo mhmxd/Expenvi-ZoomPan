@@ -5,12 +5,12 @@ import enums.Task;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Utils;
-import ui.ExperimentFrame;
 import ui.PanTaskPanel;
-import ui.ZoomTaskPanel;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import static ui.ExperimentFrame.*;
 
 public class BaseBlock {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
@@ -29,11 +29,14 @@ public class BaseBlock {
 
         switch (task) {
             case ZOOM_IN -> {
-
-                int START_LEVEL = 1; // Outer ring
+//                int START_LEVEL = 1; // Outer ring
                 for (int j = 0; j < repetition; j++) {
-                    for (int lvl : ExperimentFrame.ZI_TARGET_LEVELS) {
-                        trials.add(new ZoomTrial(Task.ZOOM_IN, START_LEVEL, lvl));
+                    for (int dist : TARGET_DISTS) {
+                        // Choose the target randomly (from 1 to total n levels - dist - tol)
+                        final int targetLevel = Utils.randInt(
+                                dist + TARGET_TOLERANCE,
+                                MAX_NOTCHES - dist - TARGET_TOLERANCE);
+                        trials.add(new ZoomTrial(Task.ZOOM_IN, targetLevel - dist, targetLevel));
                     }
 
                     Collections.shuffle(trials);
@@ -48,9 +51,13 @@ public class BaseBlock {
 
             case ZOOM_OUT -> {
 
-                int START_LEVEL = ZoomTaskPanel.GRID_SIZE / 2 + 1; // Central circle
-                for (int lvl : ExperimentFrame.ZO_TARGET_LEVELS) {
-                    trials.add(new ZoomTrial(Task.ZOOM_IN, START_LEVEL, lvl));
+//                int START_LEVEL = ZoomTaskPanel.ZOOM_N_ELEMENTS / 2 + 1; // Central circle
+                for (int dist : TARGET_DISTS) {
+                    // Choose the target randomly (from 1 to total n levels - dist - tol)
+                    final int targetLevel = Utils.randInt(
+                            1 + TARGET_TOLERANCE,
+                            MAX_NOTCHES - dist - TARGET_TOLERANCE);
+                    trials.add(new ZoomTrial(Task.ZOOM_OUT, targetLevel + dist, targetLevel));
                 }
 
                 Collections.shuffle(trials);

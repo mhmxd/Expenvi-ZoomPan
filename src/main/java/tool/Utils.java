@@ -42,6 +42,35 @@ public class Utils {
         return max;
     }
 
+    public static boolean isBetween(double value, int min, int max, String excl) {
+        switch (excl) {
+            case "00" -> {
+                return (value > min) && (value < max);
+            }
+
+            case "01" -> {
+                return (value > min) && (value <= max);
+            }
+
+            case "10" -> {
+                return (value >= min) && (value < max);
+            }
+
+            case "11" -> {
+                return (value >= min) && (value <= max);
+            }
+        }
+
+        return false;
+    }
+
+    public static double modifyInRange(double value, double change, int min, int max) {
+        if (isBetween(value + change, min, max, "11")) return value + change;
+        else if (value + change < min) return min;
+        else if (value + change > max) return max;
+        return value;
+    }
+
     /**
      * mm to pixel
      * @param mm - millimeters

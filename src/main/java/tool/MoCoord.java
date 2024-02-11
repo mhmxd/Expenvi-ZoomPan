@@ -5,6 +5,11 @@ public class MoCoord {
     public int y;
     public String id = "";
 
+    public MoCoord(int val) {
+        this.x = val;
+        this.y = val;
+    }
+
     public MoCoord(int x, int y) {
         this.x = x;
         this.y = y;

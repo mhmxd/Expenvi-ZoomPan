@@ -35,14 +35,22 @@ public class ZoomTaskPanel
     public static final int NUM_ZOOM_REPETITIONS = 3;
     public static final double VIEWPPORT_SIZE_mm = 200;
 //    public static final double WHEEL_STEP_SIZE = 0.25;
-    public static final double WHEEL_SCALE = 0.07; // Based on Windows 10
-    public static final int TOLERANCE = 1; // Tolerance (1 row before and after the target is colored)
+//    public static final float NOTCH_SCALE = 0.1f; // Based on Windows 10
 
-    public static final int GRID_SIZE = 51; // Grid # elements in rows = columns
-    public static final int GRID_GUTTER = 30; // Space between elements
-    public static final int GRID_ELEMENT_SIZE = 100; // Diameter/W of the grid elements
+//    public static final int ZOOM_N_ELEMENTS = 31; // # elements in rows = columns
+    public static final int ELEMENT_NOTCH_RATIO = 3;
+    public static final double NOTCH_MM = 1;
+    public static int N_ELEMENTS;
+//    public static final int N_ELEMENTS = (ExperimentFrame.TOTAL_N_NOTCHES / ELEMENT_NOTCH_RATIO) * 2 + 1;
+    public static final int ZOOM_OUT_ELEMENT_SIZE = 80; // Diameter of the elements (px)
+    public static final int ZOOM_IN_ELEMENT_SIZE = 170; // W of the elements (px)
+    public static final int ZOOM_IN_ELEMENT_RADIUS = 50; // Corner radius of the elements (px)
+    public static final int GUTTER_RATIO = 3;
+
+    public static final int MAX_ZOOM_LEVEL = 1700;
 
     public static final String ZOOM_OUT_SVG_FILE_NAME = "zoom_out.svg";
+    public static final String ZOOM_IN_SVG_FILE_NAME = "zoom_in.svg";
 
     // Experiment
     private final Task task;
@@ -78,14 +86,29 @@ public class ZoomTaskPanel
         createBlocks();
 
         // Generate the zooming SVG
-        MoSVG.genCircleGrid(
-                ZOOM_OUT_SVG_FILE_NAME,
-                GRID_SIZE, GRID_ELEMENT_SIZE, GRID_GUTTER,
-                COLORS.YELLOW);
+        N_ELEMENTS = (ExperimentFrame.MAX_NOTCHES / ExperimentFrame.NOTCHES_IN_ELEMENT) * 2 + 1;
+//        final int N_ELEMENTS = (ExperimentFrame.TOTAL_N_NOTCHES / ELEMENT_NOTCH_RATIO) + 1;
+        if (task.equals(Task.ZOOM_IN)) {
+            MoSVG.genRectGrid(
+                    ZOOM_IN_SVG_FILE_NAME,
+                    N_ELEMENTS,
+                    ZOOM_IN_ELEMENT_SIZE,
+                    ZOOM_IN_ELEMENT_RADIUS,
+                    0,
+                    COLORS.YELLOW);
+        } else {
+            MoSVG.genCircleGrid(
+                    ZOOM_OUT_SVG_FILE_NAME,
+                    N_ELEMENTS,
+                    ZOOM_OUT_ELEMENT_SIZE,
+                    0,
+                    COLORS.BLUE);
+        }
+
 
         // Add the elements to the list (done once)
-        for (int r = 1; r <= GRID_SIZE; r++) {
-            for (int c = 1; c <= GRID_SIZE; c++) {
+        for (int r = 1; r <= N_ELEMENTS; r++) {
+            for (int c = 1; c <= N_ELEMENTS; c++) {
                 zoomElements.add(new MoCoord(r, c, String.format("r%d_c%d", r, c)));
             }
         }
@@ -146,7 +169,6 @@ public class ZoomTaskPanel
 
         // Create the viewport for showing the trial
         zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, zoomElements, endTrialAction);
-        zoomViewPort.setBorder(BORDERS.BLACK_BORDER);
         Point position = findPositionForViewport(activeTrial.trialNum);
         zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         zoomViewPort.setVisible(true);
@@ -157,7 +179,7 @@ public class ZoomTaskPanel
 
         // Console
         conLog.info("Trial from, to: {}, {}",
-                ((ZoomTrial) activeTrial).startLevel, ((ZoomTrial) activeTrial).endLevel);
+                ((ZoomTrial) activeTrial).startNotch, ((ZoomTrial) activeTrial).targetNotch);
     }
 
     /**

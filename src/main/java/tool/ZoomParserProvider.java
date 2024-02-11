@@ -63,12 +63,6 @@ class ZoomPaintParser implements PaintParser {
         this.errorCoords = new ArrayList<>(errorCoords);
     }
 
-//    public ZoomPaintParser(PaintParser delegate, ArrayList<MoCoord> targetCoords) {
-//        conLog.trace("Construct");
-//        this.delegate = delegate;
-//        this.targetCoords = new ArrayList<>(targetCoords);
-////        this.errorCoords = new ArrayList<>(errorCoords);
-//    }
 
     @Override
     public @Nullable Color parseColor(@NotNull String value, @NotNull AttributeNode attributeNode) {
