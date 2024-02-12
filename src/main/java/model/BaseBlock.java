@@ -5,6 +5,7 @@ import enums.Task;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.Utils;
+import ui.ExperimentFrame;
 import ui.PanTaskPanel;
 
 import java.util.ArrayList;
@@ -33,9 +34,10 @@ public class BaseBlock {
                 for (int j = 0; j < repetition; j++) {
                     for (int dist : TARGET_DISTS) {
                         // Choose the target randomly (from 1 to total n levels - dist - tol)
-                        final int targetLevel = Utils.randInt(
+                        final int targetLevel = Utils.randMulInt(
                                 dist + TARGET_TOLERANCE,
-                                MAX_NOTCHES - dist - TARGET_TOLERANCE);
+                                MAX_NOTCHES - dist - TARGET_TOLERANCE - NOTCHES_IN_ELEMENT,
+                                NOTCHES_IN_ELEMENT);
                         trials.add(new ZoomTrial(Task.ZOOM_IN, targetLevel - dist, targetLevel));
                     }
 
@@ -54,9 +56,10 @@ public class BaseBlock {
 //                int START_LEVEL = ZoomTaskPanel.ZOOM_N_ELEMENTS / 2 + 1; // Central circle
                 for (int dist : TARGET_DISTS) {
                     // Choose the target randomly (from 1 to total n levels - dist - tol)
-                    final int targetLevel = Utils.randInt(
-                            1 + TARGET_TOLERANCE,
-                            MAX_NOTCHES - dist - TARGET_TOLERANCE);
+                    final int targetLevel = Utils.randMulInt(
+                            NOTCHES_IN_ELEMENT + TARGET_TOLERANCE,
+                            MAX_NOTCHES - dist - TARGET_TOLERANCE,
+                            NOTCHES_IN_ELEMENT);
                     trials.add(new ZoomTrial(Task.ZOOM_OUT, targetLevel + dist, targetLevel));
                 }
 

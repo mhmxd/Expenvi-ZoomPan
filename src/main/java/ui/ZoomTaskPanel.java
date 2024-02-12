@@ -89,26 +89,25 @@ public class ZoomTaskPanel
         N_ELEMENTS = (ExperimentFrame.MAX_NOTCHES / ExperimentFrame.NOTCHES_IN_ELEMENT) * 2 + 1;
 //        final int N_ELEMENTS = (ExperimentFrame.TOTAL_N_NOTCHES / ELEMENT_NOTCH_RATIO) + 1;
         if (task.equals(Task.ZOOM_IN)) {
-            MoSVG.genRectGrid(
+            MoSVG.genCircleGrid(
                     ZOOM_IN_SVG_FILE_NAME,
                     N_ELEMENTS,
                     ZOOM_IN_ELEMENT_SIZE,
-                    ZOOM_IN_ELEMENT_RADIUS,
                     0,
-                    COLORS.YELLOW);
+                    COLORS.BLUE);
         } else {
             MoSVG.genCircleGrid(
                     ZOOM_OUT_SVG_FILE_NAME,
                     N_ELEMENTS,
                     ZOOM_OUT_ELEMENT_SIZE,
                     0,
-                    COLORS.BLUE);
+                    COLORS.YELLOW);
         }
 
 
         // Add the elements to the list (done once)
-        for (int r = 1; r <= N_ELEMENTS; r++) {
-            for (int c = 1; c <= N_ELEMENTS; c++) {
+        for (int r = 0; r < N_ELEMENTS; r++) {
+            for (int c = 0; c < N_ELEMENTS; c++) {
                 zoomElements.add(new MoCoord(r, c, String.format("r%d_c%d", r, c)));
             }
         }
@@ -276,7 +275,7 @@ public class ZoomTaskPanel
     }
 
     @Override
-    public void mooseScrolled(Memo e) {
+    public void mooseScrolled(Memo mem) {
 
     }
 

@@ -1,6 +1,7 @@
 package tool;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tool.Constants.*;
@@ -20,26 +21,70 @@ public class Utils {
         else return ThreadLocalRandom.current().nextInt(min, bound);
     }
 
-    public static int getMinXFromList(List<MoCoord> list) {
-        if (list == null || list.isEmpty()) return -1;
+    /**
+     * Returns a random odd int between the min (inclusive) and the bound (exclusive)
+     * @param min Minimum (inclusive)
+     * @param bound Bound (exclusive)
+     * @return Random int
+     */
+    public static int randOddInt(int min, int bound) {
+        if (bound <= min) return min;
+        else {
+            Random random = new Random();
+            int randomInt;
+            do {
+                randomInt = random.nextInt(bound - min) + min;
+            } while (randomInt % 2 == 0); // Keep generating until we get an odd number
 
-        int min = list.get(0).x;
-        for (MoCoord p : list) {
-            if (p.x < min) min = p.x;
+            return randomInt;
         }
-
-        return min;
     }
 
-    public static int getMaxXFromList(List<MoCoord> list) {
-        if (list == null || list.isEmpty()) return -1;
+    /**
+     * Returns a random int, multiple of mult,  between the min (inclusive) and the bound (exclusive)
+     * @param min Minimum (inclusive)
+     * @param bound Bound (exclusive)
+     * @return Random int
+     */
+    public static int randMulInt(int min, int bound, int mult) {
+        if (bound <= min) return min;
+        else {
+            Random random = new Random();
+            int randomInt;
+            do {
+                randomInt = random.nextInt(bound - min) + min;
+            } while (randomInt % mult != 0); // Keep generating until we get a multiple number
 
-        int max = list.get(0).x;
-        for (MoCoord p : list) {
-            if (p.x > max) max = p.x;
+            return randomInt;
+        }
+    }
+
+    public static int getLastIndBelow(List<Integer> list, int threshold) {
+        if (list == null || list.isEmpty()) {
+            return -1;
         }
 
-        return max;
+        int lastBelowThreshold = -1;
+        for (int num : list) {
+            if (num < threshold) {
+                lastBelowThreshold = num; // Update the lastBelowThreshold if the current num is below the threshold
+            }
+        }
+
+        return lastBelowThreshold;
+    }
+
+    public static int getFirstAboveThreshold(List<Integer> list, int threshold) {
+        if (list == null || list.isEmpty()) {
+            return -1;
+        }
+
+        int lastBelowThreshold = -1;
+        for (int num : list) {
+            if (num > threshold) return num;
+        }
+
+        return -1;
     }
 
     public static boolean isBetween(double value, int min, int max, String excl) {

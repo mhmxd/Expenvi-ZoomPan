@@ -376,10 +376,10 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     }
 
     @Override
-    public void mooseScrolled(Memo e) {
-        conLog.trace("Translate: {}, {}", e.getV1Int(), e.getV2Int());
+    public void mooseScrolled(Memo mem) {
+        conLog.trace("Translate: {}, {}", mem.getV1Int(), mem.getV2Int());
         if (hasFocus) {
-            translate((int) (e.getV1Int() * PanTaskPanel.GAIN), (int) (e.getV2Int() * PanTaskPanel.GAIN));
+            translate((int) (mem.getV1Int() * PanTaskPanel.GAIN), (int) (mem.getV2Int() * PanTaskPanel.GAIN));
         }
     }
 

@@ -37,7 +37,7 @@ public class MoSVG {
                     int cy = j * (diam + gutter) + rad;
 
                     // Write the circle
-                    final String id = String.format("r%d_c%d", j+1, i+1);
+                    final String id = String.format("r%d_c%d", j, i);
                     fileWriter.println("<circle " +
                             "id=\"" + id +
                             "\" cx=\"" + cx + "\" cy=\"" + cy + "\" " +
@@ -91,7 +91,7 @@ public class MoSVG {
                     int y = j * (size + gutter);
 
                     // Write the rectangle
-                    final String idStr = String.format("\"r%d_c%d\"", j+1, i+1);
+                    final String idStr = String.format("\"r%d_c%d\"", j, i);
                     final String xStr = String.format("\"%d\"", x);
                     final String yStr = String.format("\"%d\"", y);
 

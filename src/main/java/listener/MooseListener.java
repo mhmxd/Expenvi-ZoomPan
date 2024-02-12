@@ -7,7 +7,7 @@ import java.util.EventListener;
 public interface MooseListener extends EventListener {
     void mooseClicked(Memo e);
 
-    void mooseScrolled(Memo e);
+    void mooseScrolled(Memo mem);
 
     void mooseWheelMoved(Memo e);
 

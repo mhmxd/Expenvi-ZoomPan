@@ -27,30 +27,30 @@ public class Moose {
         mooseListener.remove(MooseListener.class, l);
     }
 
-    public void processMooseEvent(Memo e) {
+    public void processMooseEvent(Memo mem) {
         MooseListener[] listeners = mooseListener.getListeners(MooseListener.class);
         if (listeners.length > 0) {
-            switch (e.getAction()) {
+            switch (mem.getAction()) {
                 case STRINGS.CLICK -> {
                     for (MooseListener l : listeners) {
-                        l.mooseClicked(e);
+                        l.mooseClicked(mem);
                     }
                 }
                 case STRINGS.SCROLL -> {
                     for (MooseListener l : listeners) {
-                        l.mooseScrolled(e);
+                        l.mooseScrolled(mem);
                     }
                 }
                 case STRINGS.ZOOM -> {
-                    switch (e.getMode()) {
+                    switch (mem.getMode()) {
                         case STRINGS.ZOOM -> {
                             for (MooseListener l : listeners) {
-                                l.mooseWheelMoved(e);
+                                l.mooseWheelMoved(mem);
                             }
                         }
                         case STRINGS.ZOOM_START -> {
                             for (MooseListener l : listeners) {
-                                l.mooseZoomStart(e);
+                                l.mooseZoomStart(mem);
                             }
                         }
                     }

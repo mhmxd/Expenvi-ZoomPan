@@ -62,6 +62,64 @@ public class MoCoord {
     }
 
     /**
+     * Checks if X falls in a range
+     * @param min Min
+     * @param max Max
+     * @param excl Exclusivity ("00", "01", "10", "11")
+     * @return Boolean
+     */
+    public boolean isXBetween(int min, int max, String excl) {
+        switch (excl) {
+            case "00" -> {
+                return (x > min) && (x < max);
+            }
+
+            case "01" -> {
+                return (x > min) && (x <= max);
+            }
+
+            case "10" -> {
+                return (x >= min) && (x < max);
+            }
+
+            case "11" -> {
+                return (x >= min) && (x <= max);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if X falls in a range
+     * @param min Min
+     * @param max Max
+     * @param excl Exclusivity ("00", "01", "10", "11")
+     * @return Boolean
+     */
+    public boolean isYBetween(int min, int max, String excl) {
+        switch (excl) {
+            case "00" -> {
+                return (y > min) && (y < max);
+            }
+
+            case "01" -> {
+                return (y > min) && (y <= max);
+            }
+
+            case "10" -> {
+                return (y >= min) && (y < max);
+            }
+
+            case "11" -> {
+                return (y >= min) && (y <= max);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Checks if both fall in a range
      * @param min Min
      * @param max Max

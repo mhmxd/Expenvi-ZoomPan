@@ -22,7 +22,7 @@ public class ExperimentFrame extends JFrame {
     public static int MAX_NOTCHES = 90; // Arbitrary (between Win 44 and Mac 300)
     public static int[] TARGET_DISTS = new int[]{15, 30, 60}; // In notches
     public static int NOTCHES_IN_ELEMENT = 5;
-    public static final int TARGET_TOLERANCE = 1; // Tolerance (in notches)
+    public static final int TARGET_TOLERANCE = 5; // Tolerance (in notches)
 
     public static double LR_MARGIN_MM = 20.0;
 
