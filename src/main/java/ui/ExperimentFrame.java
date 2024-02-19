@@ -19,10 +19,15 @@ public class ExperimentFrame extends JFrame {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     public static String pID = "100";
+
+    public static final int NUM_ZOOM_BLOCKS = 10;
+    public static final int NUM_ZOOM_REPETITIONS = 5;
+
     public static int MAX_NOTCHES = 90; // Arbitrary (between Win 44 and Mac 300)
     public static int[] TARGET_DISTS = new int[]{15, 30, 60}; // In notches
-    public static int NOTCHES_IN_ELEMENT = 5;
-    public static final int TARGET_TOLERANCE = 5; // Tolerance (in notches)
+    public static int NOTCHES_IN_ELEMENT = 6;
+    public static final int TARGET_TOLERANCE = 4; //  Tolerance (in notches)
+    public static final float MOOSE_MM_TO_NOTCH = 0.1f;
 
     public static double LR_MARGIN_MM = 20.0;
 

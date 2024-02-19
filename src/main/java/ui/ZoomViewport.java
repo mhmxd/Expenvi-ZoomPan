@@ -5,9 +5,9 @@ import com.kitfox.svg.animation.AnimationElement;
 import com.kitfox.svg.app.beans.SVGIcon;
 import com.kitfox.svg.app.beans.SVGPanel;
 import control.Logex;
+import enums.ErrorEvent;
 import enums.Task;
 import enums.TrialEvent;
-import jdk.jshell.execution.Util;
 import listener.MooseListener;
 import model.ZoomTrial;
 import moose.Memo;
@@ -49,7 +49,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     private boolean hasFocus;
     private int svgSize;
     private double nVisibleEl = ZoomTaskPanel.N_ELEMENTS;
-    private int currentNotch;
+    private float currentNotch;
 
     // Tools
     private Robot robot;
@@ -144,6 +144,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         super.setVisible(aFlag);
 
         if (aFlag) {
+            // Log
+            Logex.get().logEvent(TrialEvent.TRIAL_OPEN);
 
             // Find the target elements (to be colored green)
             final ArrayList<MoCoord> targetCoords = findTargetElements();
@@ -216,16 +218,18 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         final int lastElement = N_ELEMENTS - 1;
 
         // Top side
-        int leftmostCol = (trial.targetNotch - NOTCH_TOL) / EL_NOTCH_RATIO;
-        int leftCol = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
+        int leftmostCol = (trial.targetNotch + NOTCH_TOL/2) / EL_NOTCH_RATIO;
+//        int leftCol = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
+        int leftCol = leftmostCol;
 //        conLog.info("LMC {}; LC {}", leftmostCol, leftCol);
 //        int rightmostCol = N_ELEMENTS - ((trial.targetNotch - NOTCH_TOL - 1) / EL_NOTCH_RATIO);
         int rightmostCol = lastElement - leftmostCol;
         int rightCol = lastElement - leftCol;
 //        int rightCol = N_ELEMENTS - ((trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO);
 //        conLog.info("RMC {}; RC {}", rightmostCol, rightCol);
-        int topmostRow = (trial.targetNotch - NOTCH_TOL) / EL_NOTCH_RATIO;
-        int topRow = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
+        int topmostRow = (trial.targetNotch + NOTCH_TOL/2) / EL_NOTCH_RATIO;
+//        int topRow = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
+        int topRow = topmostRow;
 
         int lowermostRow = lastElement - topmostRow;
         int lowerRow = lastElement - topRow;
@@ -284,7 +288,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         int rightOutBoundary = xList.get(xList.size() - 1);
         int leftInBoundary = leftOutBoundary + 2 * tol / notchInElement;
         int rightInBoundary = rightOutBoundary - 2 * tol / notchInElement;
-        conLog.info("Boundaries: {}; {}", leftInBoundary, rightInBoundary);
+
         if (trial.task.equals(Task.ZOOM_OUT)) {
             // Color the outside
             for (MoCoord element : zoomElements) {
@@ -297,9 +301,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         if (trial.task.equals(Task.ZOOM_IN)) {
             // Color the inside
             for (MoCoord element : zoomElements) {
-//                conLog.info("Element: {}", element);
                 if (element.isBothInBetween(leftInBoundary, rightInBoundary, "00")) {
-                    conLog.info("Element In: {}", element);
                     result.add(element);
                 }
             }
@@ -313,7 +315,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
      * @return True (Hit) or False
      */
     protected boolean checkHit() {
-        return Utils.isBetween(currentNotch,
+        conLog.info("CheckHit – currentNotch: {}", currentNotch);
+        return Utils.isBetween(Math.floor(currentNotch),
                 trial.targetNotch - ExperimentFrame.TARGET_TOLERANCE,
                 trial.targetNotch + ExperimentFrame.TARGET_TOLERANCE,
                 "11");
@@ -322,17 +325,13 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2D = (Graphics2D) g;
-
-        // Load the svg root
-        SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(svgURI);
-        svgRoot = diagram.getRoot();
+//        Graphics2D g2D = (Graphics2D) g;
 
         // Transform the svg
         svgIcon.setPreferredSize(new Dimension(svgSize, svgSize));
         int newCoord = - (svgSize - getWidth()) / 2;
-        svgIcon.paintIcon(this, g2D, newCoord, newCoord);
-        conLog.info("Paint svgSize = {}", svgSize);
+        svgIcon.paintIcon(this, g, newCoord, newCoord);
+//        conLog.info("Paint svgSize = {}", svgSize);
     }
 
     /**
@@ -346,21 +345,36 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 //        return findSVGSize(dVisibleEl);
 //    }
 
-    private int findSVGSize(int notch) {
-        double dVisibleEl = -((double) 1 / ExperimentFrame.NOTCHES_IN_ELEMENT) * 2 * notch; // 2 for both sides
-        conLog.info("dVisibleEl = {}", dVisibleEl);
-        return findSVGSize(dVisibleEl);
-    }
+//    private int findSVGSize(int notch) {
+//        double dVisibleEl = -((double) 1 / ExperimentFrame.NOTCHES_IN_ELEMENT) * 2 * notch; // 2 for both sides
+//        conLog.info("dVisibleEl = {}", dVisibleEl);
+//        nVisibleEl = Utils.modifyInRange(
+//                nVisibleEl, dVisibleEl,
+//                1, ZoomTaskPanel.N_ELEMENTS);
+//        conLog.info("nVis = {}", nVisibleEl);
+//        double cirSize = getWidth() / nVisibleEl;
+//        return (int) (cirSize * ZoomTaskPanel.N_ELEMENTS);
+//    }
 
     /**
      * Set the svg size and repaint
-     * @param dVisibleElements Diff in the number of visible elements
+     * @param dNotch Notch (float, from Moose prolly)
      */
-    private int findSVGSize(double dVisibleElements) {
-        nVisibleEl = Utils.modifyInRange(
-                nVisibleEl, dVisibleElements,
-                1, ZoomTaskPanel.N_ELEMENTS);
-        conLog.info("nVis = {}", nVisibleEl);
+    private int findSVGSize(float dNotch) {
+//        conLog.info("dVisibleEl = {}", dVisibleEl);
+        if (Utils.isBetween(currentNotch + dNotch, 0, ExperimentFrame.MAX_NOTCHES, "11")) {
+            nVisibleEl -= ((double) 1 / ExperimentFrame.NOTCHES_IN_ELEMENT) * 2 * dNotch; // 2 for both sides
+            currentNotch += dNotch;
+        } else if (currentNotch + dNotch < 0) {
+            nVisibleEl = ZoomTaskPanel.N_ELEMENTS;
+            currentNotch = 0;
+        } else {
+            nVisibleEl = 1;
+            currentNotch = ExperimentFrame.MAX_NOTCHES;
+        }
+
+        conLog.trace("dNotch = {} -> currentNotch = {} -> nVisibleEl = {}",
+                dNotch, currentNotch, nVisibleEl);
         double cirSize = getWidth() / nVisibleEl;
         return (int) (cirSize * ZoomTaskPanel.N_ELEMENTS);
     }
@@ -370,15 +384,19 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         @Override
         public void actionPerformed(ActionEvent e) {
-
-            if (checkHit()) {
-                conLog.debug("Time from first zoom = {}",
-                        Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM).until(
-                                Instant.now(),
-                                ChronoUnit.MILLIS));
-                endTrialAction.actionPerformed(e);
-            } else { // Not the correct zoom level
-                borderBlinker.start();
+            // Pressed outside
+            if (!hasFocus) {
+                Logex.get().logError(ErrorEvent.SPACE_ZOOM, ErrorEvent.OUTSIDE_ZVP);
+            } else {
+                if (checkHit()) {
+                    conLog.debug("Time from first zoom = {}",
+                            Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM).until(
+                                    Instant.now(),
+                                    ChronoUnit.MILLIS));
+                    endTrialAction.actionPerformed(e);
+                } else { // Not the correct zoom level
+                    borderBlinker.start();
+                }
             }
         }
     };
@@ -387,7 +405,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            double dNVisibleEl = -0.5;
+            float dNVisibleEl = 1f;
+            currentNotch += dNVisibleEl;
             svgSize = findSVGSize(dNVisibleEl);
             repaint();
         }
@@ -397,7 +416,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            double dNVisibleEl = 0.5;
+            float dNVisibleEl = -1f;
+            currentNotch += dNVisibleEl;
             svgSize = findSVGSize(dNVisibleEl);
             repaint();
         }
@@ -406,8 +426,11 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     // --------------------------------------------------------------------------------------------
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        // If not in focus, exit
-        if (!hasFocus) return;
+        // If not in focus, log and exit
+        if (!hasFocus) {
+            Logex.get().logError(ErrorEvent.SCROLL, ErrorEvent.OUTSIDE_ZVP);
+            return;
+        }
 
         // If a timer is running, stop it
         if (borderBlinker.isRunning()) {
@@ -415,33 +438,27 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             setBorder(BORDERS.FOCUSED_BORDER);
         }
 
-        // If it's the first zoom and the direction is not determined, set the direction
-        Logex.get().log(TrialEvent.ZOOM);
-//        if (firstZoomInRightDirection == null) {
-//            if (isZoomIn) firstZoomInRightDirection = e.getWheelRotation() < 0;
-//            else firstZoomInRightDirection = e.getWheelRotation() > 0;
-//        }
-
-        // TODO: Put instant when the correct zoom level is reached
-
+        // Zoom
         int rot = e.getWheelRotation();
-        conLog.info("Rotation = {}", rot);
-        currentNotch -= rot;
         svgSize = findSVGSize(-rot);
         repaint();
 
-        // LOG
-        Logex.get().log(TrialEvent.ZOOM);
+        //-- Log
+        Logex.get().logEvent(TrialEvent.ZOOM);
+        // Wrong direction in first zoom
+        if ((rot > 0 && trial.task.equals(Task.ZOOM_IN)) || (rot < 0 && trial.task.equals(Task.ZOOM_OUT))) {
+            Logex.get().logError(ErrorEvent.FIRST_ZOOM, ErrorEvent.WRONG_DIRECTION);
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        Logex.get().logError(ErrorEvent.CLICK, ErrorEvent.INSIDE_ZVP);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        borderBlinker.start();
     }
 
     @Override
@@ -454,7 +471,8 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         hasFocus = true;
         setBorder(BORDERS.FOCUSED_BORDER);
 
-        Logex.get().log(TrialEvent.FOCUS_ENTER);
+        // Log
+        Logex.get().logEvent(TrialEvent.VIEWPORT_ENTER);
     }
 
     @Override
@@ -462,11 +480,13 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         hasFocus = false;
         setBorder(BORDERS.FOCUS_LOST_BORDER);
 
-        Logex.get().log(TrialEvent.FOCUS_EXIT);
+        // Log
+        Logex.get().logEvent(TrialEvent.VIEWPORT_EXIT);
     }
 
     @Override
-    public void mooseClicked(Memo e) {
+    public void mooseClicked(Memo mem) {
+        Logex.get().logError(ErrorEvent.CLICK, ErrorEvent.INSIDE_ZVP);
         borderBlinker.start();
     }
 
@@ -476,10 +496,13 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     }
 
     @Override
-    public void mooseWheelMoved(Memo e) {
+    public void mooseWheelMoved(Memo mem) {
 
-        // If not in focus, exit
-        if (!hasFocus) return;
+        // If not in focus, log and exit
+        if (!hasFocus) {
+            Logex.get().logError(ErrorEvent.SCROLL, ErrorEvent.OUTSIDE_ZVP);
+            return;
+        }
 
         // If a timer is running, stop it
         if (borderBlinker.isRunning()) {
@@ -487,66 +510,25 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             setBorder(BORDERS.FOCUSED_BORDER);
         }
 
-        //-- Christian's
-        // Parse the scaling factor from the Memo
-//        float scale = Float.parseFloat(e.getValue1());
-
-        // If the scaling factor is zero, do nothing
-//        if (scale == 0.0) {
-//            return;
-//        }
-
-        // Determine the first zoom direction if not set
-//        if (firstZoomInRightDirection == null) {
-//            if (trial.task.equals(Task.ZOOM_IN)) {
-//                firstZoomInRightDirection = scale < 0;
-//            } else {
-//                firstZoomInRightDirection = scale > 0;
-//            }
-//        }
-
-        // If the zoom level is already at maximum and the scale is positive, do nothing
-//        if (zoomLevel >= 35 + 1 && scale > 0) {
-//            return;
-//        }
-
-        // Update the zoom level based on the scaling input
-        // scale * 4: Is 2 rows for 1 Zoom-Level
-//        zoomLevel = (int) (mooseZoomStartLevel + (scale * 4));
-
-        Logex.get().log(TrialEvent.ZOOM);
-
-//        final float zoomAmp = e.getV1Float();
-//
-//        // Exponential
-////        final float newZoomLevel = zoomLevel + zoomAmp * scale * zoomLevel;
-////        if (Utils.isBetween(newZoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL, "11")) {
-////            zoomLevel = newZoomLevel;
-////            conLog.info("Zoom Level = {}", zoomLevel);
-////            // Repaint to reflect the changes
-////            repaint();
-////        }
-//
-//        // Constant
-//        final float GAIN = 0.08f;
-//        final float newZoomLevel = level + zoomAmp * GAIN;
-//        if (Utils.isBetween(newZoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL, "11")) {
-//            level = newZoomLevel;
-//            conLog.info("Zoom Level = {}", level);
-//            // Repaint to reflect the changes
-//            repaint();
-//        }
+        Logex.get().logEvent(TrialEvent.ZOOM);
 
         // Repaint the component to reflect the zooming
-
+        final float dYmm = mem.getV1Float();
+        final float zoomAmp = dYmm * ExperimentFrame.MOOSE_MM_TO_NOTCH;
+        conLog.trace("dYmm; zoomAmp = {}; {}", dYmm, zoomAmp);
+        svgSize = findSVGSize(-zoomAmp); // (-) for zoom-in
         repaint();
 
-        // LOG
-        Logex.get().log(TrialEvent.ZOOM);
+        //-- Log
+        Logex.get().logEvent(TrialEvent.ZOOM);
+        // Wrong direction in first zoom
+        if ((zoomAmp > 0 && trial.task.equals(Task.ZOOM_IN)) || (zoomAmp < 0 && trial.task.equals(Task.ZOOM_OUT))) {
+            Logex.get().logError(ErrorEvent.FIRST_ZOOM, ErrorEvent.WRONG_DIRECTION);
+        }
     }
 
     @Override
-    public void mooseZoomStart(Memo e) {
+    public void mooseZoomStart(Memo mem) {
 //        mooseZoomStartLevel = level;
     }
 }

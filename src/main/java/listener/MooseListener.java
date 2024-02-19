@@ -5,11 +5,11 @@ import moose.Memo;
 import java.util.EventListener;
 
 public interface MooseListener extends EventListener {
-    void mooseClicked(Memo e);
+    void mooseClicked(Memo mem);
 
     void mooseScrolled(Memo mem);
 
-    void mooseWheelMoved(Memo e);
+    void mooseWheelMoved(Memo mem);
 
-    void mooseZoomStart(Memo e);
+    void mooseZoomStart(Memo mem);
 }

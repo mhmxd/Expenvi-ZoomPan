@@ -1,12 +1,13 @@
 package control;
 
+import enums.ErrorEvent;
 import enums.TrialEvent;
 import model.BaseTrial;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,8 +16,9 @@ public class Logex {
     private static Logex self;
 
     private BaseTrial activeTrial;
-    // Keys are from TrialEvent strings
-    private final Map<String, TrialEvent> trialEvenLog = new HashMap<>();
+
+    private final Map<String, TrialEvent> trialLogs = new HashMap<>(); // Keys: TrialEvent strings
+    private final Map<String, ErrorEvent> errorLogs = new HashMap<>(); // Keys: ErrorEvent strings
 
     /**
      * Constructor
@@ -40,17 +42,19 @@ public class Logex {
      */
     public void activateTrial(BaseTrial trial) {
         activeTrial = trial;
-        // Clear the log map
-        trialEvenLog.clear();
+
+        // Clear the log maps
+        trialLogs.clear();
+        errorLogs.clear();
     }
 
     /**
      * Log a trial event (get current tiem yourself!)
      * @param event TrialEvent
      */
-    public void log(TrialEvent event) {
+    public void logEvent(TrialEvent event) {
         // Add the event to the list
-        trialEvenLog.put(event.getName(), event);
+        trialLogs.put(event.getKey(), event);
 
         // TODO process the specific times
     }
@@ -59,9 +63,9 @@ public class Logex {
      * Log an event using only the key (manage the first/last yourself!)
      * @param key Key from TrialEvent
      */
-    public void log(String key) {
+    public void logEvent(String key) {
         if (key == TrialEvent.TRIAL_OPEN || key == TrialEvent.TRIAL_CLOSE || key == TrialEvent.SPACE_PRESS) {
-            trialEvenLog.put(key, new TrialEvent(key));
+            trialLogs.put(key, new TrialEvent(key));
             return;
         }
 
@@ -69,23 +73,45 @@ public class Logex {
         String eventLastName = TrialEvent.getLastName(key);
 
         // If first is empty, add first
-        if (!trialEvenLog.containsKey(eventFirstName)) {
-            trialEvenLog.put(eventFirstName, new TrialEvent(eventFirstName));
+        if (!trialLogs.containsKey(eventFirstName)) {
+            trialLogs.put(eventFirstName, new TrialEvent(eventFirstName));
             conLog.trace("Logged {}, {}", eventFirstName, getTrialInstant(eventFirstName));
         }
 
         // Add last
-        trialEvenLog.put(eventLastName, new TrialEvent(eventLastName));
+        trialLogs.put(eventLastName, new TrialEvent(eventLastName));
         conLog.trace("Logged {}", eventLastName);
     }
 
-    public TrialEvent getTrialEvent(String name) {
-        return trialEvenLog.get(name);
+    public void logError(String errKey, int errCode) {
+        errorLogs.put(errKey, new ErrorEvent(errKey, errCode));
     }
 
+    /**
+     * Get a TrialEvent
+     * @param name Name of the event
+     * @return TrialEvent
+     */
+    public TrialEvent getTrialEvent(String name) {
+        return trialLogs.get(name);
+    }
+
+    /**
+     * Get the Instant of a TrialEvent
+     * @param name TrialEvent name
+     * @return Instant
+     */
     public Instant getTrialInstant(String name) {
         if (hasLogged(name)) return getTrialEvent(name).getInstant();
         else return Instant.MIN;
+    }
+
+    public double getDurationSec(String beginKey, String endKey) {
+        Instant beginInst = getTrialInstant(beginKey);
+        Instant endInst = getTrialInstant(endKey);
+
+        if (beginInst.equals(Instant.MIN) || endInst.equals(Instant.MIN)) return Double.NaN;
+        else return Duration.between(beginInst, endInst).toMillis() / 1000.0;
     }
 
     /**
@@ -95,7 +121,7 @@ public class Logex {
      */
     public boolean hasLoggedKey(String key) {
         String lastName = TrialEvent.getLastName(key);
-        if (lastName != "") return trialEvenLog.containsKey(lastName);
+        if (lastName != "") return trialLogs.containsKey(lastName);
         return false;
     }
 
@@ -105,6 +131,6 @@ public class Logex {
      * @return Time (long)
      */
     public boolean hasLogged(String eventName) {
-        return trialEvenLog.containsKey(eventName);
+        return trialLogs.containsKey(eventName);
     }
 }

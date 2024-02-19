@@ -249,7 +249,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param dY Delta-Y
      */
     public void translate(int dX, int dY) {
-        Logex.get().log(TrialEvent.PAN); // LOG
+        Logex.get().logEvent(TrialEvent.PAN); // LOG
 
         this.xDiff += dX;
         this.yDiff += dY;
@@ -371,7 +371,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     }
 
     @Override
-    public void mooseClicked(Memo e) {
+    public void mooseClicked(Memo mem) {
         borderBlinker.start();
     }
 
@@ -384,12 +384,12 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     }
 
     @Override
-    public void mooseWheelMoved(Memo e) {
+    public void mooseWheelMoved(Memo mem) {
 
     }
 
     @Override
-    public void mooseZoomStart(Memo e) {
+    public void mooseZoomStart(Memo mem) {
 
     }
 
@@ -398,7 +398,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         // If hasn't entered before or has exited before
         if (!Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER) ||
                 Logex.get().hasLoggedKey(TrialEvent.FOCUS_EXIT)) {
-            Logex.get().log(TrialEvent.FOCUS_ENTER);
+            Logex.get().logEvent(TrialEvent.FOCUS_ENTER);
 
             // Start the stopwatch (if not already started)
             if (!insideFocusStopwatch.isRunning()) insideFocusStopwatch.start();
@@ -410,7 +410,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     private void logOutsideFocus() {
         // If hasn't exited before or has entered before
         if (Logex.get().hasLoggedKey(TrialEvent.FOCUS_ENTER)) {
-            Logex.get().log(TrialEvent.FOCUS_EXIT);
+            Logex.get().logEvent(TrialEvent.FOCUS_EXIT);
 
             // Start the stopwatch (if not already started)
             if (insideFocusStopwatch.isRunning()) insideFocusStopwatch.stop();

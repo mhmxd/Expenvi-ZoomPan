@@ -48,11 +48,11 @@ public class Moose {
                                 l.mooseWheelMoved(mem);
                             }
                         }
-                        case STRINGS.ZOOM_START -> {
-                            for (MooseListener l : listeners) {
-                                l.mooseZoomStart(mem);
-                            }
-                        }
+//                        case STRINGS.ZOOM_START -> {
+//                            for (MooseListener l : listeners) {
+//                                l.mooseZoomStart(mem);
+//                            }
+//                        }
                     }
                 }
             }

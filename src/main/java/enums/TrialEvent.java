@@ -1,8 +1,16 @@
 package enums;
 
+import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
+
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 
 public class TrialEvent {
+    private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
+
     public static final String TRIAL_OPEN = "trial_open";
 
     public static final String FIRST_MOVE = "first_move";
@@ -39,24 +47,26 @@ public class TrialEvent {
     public static final String FOCUS_EXIT = "focus_exit";
     public static final String VIEWPORT_EXIT = "viewport_exit";
 
-    private String name = "";
-    private Instant instant;
+    private final String key;
+    private final Instant instant;
 
     /**
      * Create an instant (time is always Instant.now())
      * @param n Name of the event (constant String from the class itself)
      */
     public TrialEvent(String n) {
-        name = n;
+        key = n;
         instant = Instant.now();
+
+        conLog.debug("{} – {}", key, instant.toString());
     }
 
     /**
      * Get the name of the event
      * @return Name of the event
      */
-    public String getName() {
-        return name;
+    public String getKey() {
+        return key;
     }
 
     /**

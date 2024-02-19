@@ -1,6 +1,7 @@
 package ui;
 
 import control.Logex;
+import enums.ErrorEvent;
 import enums.Task;
 import enums.TrialEvent;
 import enums.TrialStatus;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static tool.Constants.*;
+import static ui.ExperimentFrame.*;
 
 public class ZoomTaskPanel
         extends TaskPanel
@@ -31,14 +33,13 @@ public class ZoomTaskPanel
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     // Constants
-    public static final int NUM_ZOOM_BLOCKS = 3;
-    public static final int NUM_ZOOM_REPETITIONS = 3;
+
     public static final double VIEWPPORT_SIZE_mm = 200;
 //    public static final double WHEEL_STEP_SIZE = 0.25;
 //    public static final float NOTCH_SCALE = 0.1f; // Based on Windows 10
 
 //    public static final int ZOOM_N_ELEMENTS = 31; // # elements in rows = columns
-    public static final int ELEMENT_NOTCH_RATIO = 3;
+//    public static final int ELEMENT_NOTCH_RATIO = 3;
     public static final double NOTCH_MM = 1;
     public static int N_ELEMENTS;
 //    public static final int N_ELEMENTS = (ExperimentFrame.TOTAL_N_NOTCHES / ELEMENT_NOTCH_RATIO) * 2 + 1;
@@ -173,8 +174,9 @@ public class ZoomTaskPanel
         zoomViewPort.setVisible(true);
         add(zoomViewPort, PALETTE_LAYER);
 
-        // Inform Logex
+        // Log
         Logex.get().activateTrial(activeTrial);
+        Logex.get().logEvent(TrialEvent.TRIAL_OPEN);
 
         // Console
         conLog.info("Trial from, to: {}, {}",
@@ -208,21 +210,15 @@ public class ZoomTaskPanel
     private final AbstractAction endTrialAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Logex.get().log(TrialEvent.SPACE_PRESS);
-            double enterToSpace = Duration.between(
-                    Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
-                    Logex.get().getTrialInstant(TrialEvent.SPACE_PRESS)).toMillis() / 1000.0;
-            double firstZoomToSpace = Duration.between(
-                    Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM),
-                    Logex.get().getTrialInstant(TrialEvent.SPACE_PRESS)).toMillis() / 1000.0;
-            double enterToLastZoom = Duration.between(
-                    Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
-                    Logex.get().getTrialInstant(TrialEvent.LAST_ZOOM)).toMillis() / 1000.0;
-            double firstZoomToLastZoom = Duration.between(
-                    Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM),
-                    Logex.get().getTrialInstant(TrialEvent.LAST_ZOOM)).toMillis() / 1000.0;
+            Logex.get().logEvent(TrialEvent.SPACE_PRESS);
+            double enterToSpace = Logex.get().getDurationSec(TrialEvent.FIRST_VIEWPORT_ENTER, TrialEvent.SPACE_PRESS);
+            double firstZoomToSpace = Logex.get().getDurationSec(TrialEvent.FIRST_ZOOM, TrialEvent.SPACE_PRESS);
+            double enterToLastZoom = Logex.get().getDurationSec(TrialEvent.FIRST_FOCUS_ENTER,TrialEvent.LAST_ZOOM);
+            double firstZoomToLastZoom = Logex.get().getDurationSec(TrialEvent.FIRST_ZOOM,TrialEvent.LAST_ZOOM);
+
             conLog.info("Times: {}, {}, {}, {}",
                     enterToSpace, firstZoomToSpace, enterToLastZoom, firstZoomToLastZoom);
+
             endTrial(TrialStatus.HIT);
         }
     };
@@ -230,12 +226,12 @@ public class ZoomTaskPanel
     // Mouse -------------------------------------------------------------------------------------
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        // TODO Show an error (ptc. shouldn't click)
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        // TODO Show an error (ptc. shouldn't press)
     }
 
     @Override
@@ -255,23 +251,25 @@ public class ZoomTaskPanel
 
     @Override
     public void mouseDragged(MouseEvent e) {
-
+        // Press errro should cover this
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
+        // Log movement AFTER trial has been opened
+        if (Logex.get().hasLogged(TrialEvent.TRIAL_OPEN)) Logex.get().logEvent(TrialEvent.MOVE);
     }
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-
+        // TODO Show error if not over the ViewPort
     }
 
     // Moose --------------------------------------------------------------------------------------
     @Override
-    public void mooseClicked(Memo e) {
-
+    public void mooseClicked(Memo mem) {
+        Logex.get().logError(ErrorEvent.CLICK, ErrorEvent.OUTSIDE_ZVP);
+        // TODO Show error (no Moose clicking)
     }
 
     @Override
@@ -280,12 +278,13 @@ public class ZoomTaskPanel
     }
 
     @Override
-    public void mooseWheelMoved(Memo e) {
-
+    public void mooseWheelMoved(Memo mem) {
+        Logex.get().logError(ErrorEvent.CLICK, ErrorEvent.OUTSIDE_ZVP);
+        // TODO Show error if not over ViewPort
     }
 
     @Override
-    public void mooseZoomStart(Memo e) {
+    public void mooseZoomStart(Memo mem) {
 
     }
 }
