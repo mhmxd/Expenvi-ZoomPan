@@ -199,7 +199,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      */
     private void scanFocusAreaForCurve(int[] focusPixels) {
         // Has the curve entered the focus area?
-        boolean focusEntered = Logex.get().hasLogged(TrialEvent.FIRST_FOCUS_ENTER);
+        boolean focusEntered = Logex.get().hasLogged(TrialEvent.getFirst(TrialEvent.FOCUS_ENTER));
 
         // Check if line is inside focus area
         focusArea.setActive(false);
@@ -260,7 +260,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         SwingUtilities.invokeLater(() -> {
             if (isTrialFinished()) {
                 Duration totalTrialDuration = Duration.between(
-                        Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER),
+                        Logex.get().getTrialInstant(TrialEvent.getFirst(TrialEvent.FOCUS_ENTER)),
                         Instant.now());
 
                 // < 90% of the curve traversed inside the focus area => error
@@ -404,7 +404,6 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
             if (!insideFocusStopwatch.isRunning()) insideFocusStopwatch.start();
         }
 
-        conLog.trace("HasLogged: {}", Logex.get().getTrialInstant(TrialEvent.FIRST_FOCUS_ENTER));
     }
 
     private void logOutsideFocus() {

@@ -57,6 +57,9 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     private SVGRoot svgRoot;
     private final SVGIcon svgIcon;
 
+    // Visual
+    private int lmCol, lCol, rmCol, rCol;
+
     // Timers ---------------------------------------------------------------------------------
     private final Timer borderBlinker = new Timer(BLINKER_DELAY, new ActionListener() {
         private Border currentBorder;
@@ -98,6 +101,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         zoomElements = new ArrayList<>(zElements);
         endTrialAction = endTrAction;
         conLog.info("Trial: {}", trial);
+        conLog.info("Distance = {}", trial.targetNotch - trial.startNotch);
 
         setLayout(null);
         setBorder(BORDERS.BLACK_BORDER);
@@ -150,7 +154,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             // Find the target elements (to be colored green)
             final ArrayList<MoCoord> targetCoords = findTargetElements();
             conLog.trace("Targets: {}", targetCoords);
-            final ArrayList<MoCoord> errorCoords = findErrorElements(targetCoords);
+            final ArrayList<MoCoord> errorCoords = findErrorElements();
 
             // Remove the SVG document from the cache to prepare for reloading
             SVGCache.getSVGUniverse().removeDocument(svgURI);
@@ -198,10 +202,9 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
             }
 
             // Set the init at the start notch
-            currentNotch = trial.startNotch;
+//            currentNotch = trial.startNotch;
             svgSize = findSVGSize(trial.startNotch);
-            conLog.info("New Size = {}", svgSize);
-
+            conLog.debug("New Size = {}", svgSize);
         }
     }
 
@@ -218,45 +221,45 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         final int lastElement = N_ELEMENTS - 1;
 
         // Top side
-        int leftmostCol = (trial.targetNotch + NOTCH_TOL/2) / EL_NOTCH_RATIO;
-//        int leftCol = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
-        int leftCol = leftmostCol;
-//        conLog.info("LMC {}; LC {}", leftmostCol, leftCol);
+        lmCol = (trial.targetNotch - NOTCH_TOL) / EL_NOTCH_RATIO;
+        lCol = (trial.targetNotch + NOTCH_TOL - 1) / EL_NOTCH_RATIO; // -1 to not cover the next circle
+//        int leftCol = leftmostCol;
+        conLog.debug("LMC {}; LC {}", lmCol, lCol);
 //        int rightmostCol = N_ELEMENTS - ((trial.targetNotch - NOTCH_TOL - 1) / EL_NOTCH_RATIO);
-        int rightmostCol = lastElement - leftmostCol;
-        int rightCol = lastElement - leftCol;
+        rmCol = lastElement - lmCol;
+        rCol = lastElement - lCol;
 //        int rightCol = N_ELEMENTS - ((trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO);
-//        conLog.info("RMC {}; RC {}", rightmostCol, rightCol);
-        int topmostRow = (trial.targetNotch + NOTCH_TOL/2) / EL_NOTCH_RATIO;
-//        int topRow = (trial.targetNotch + NOTCH_TOL) / EL_NOTCH_RATIO;
-        int topRow = topmostRow;
+        conLog.debug("RMC {}; RC {}", rmCol, rCol);
+        int topmostRow = lmCol;
+        int topRow = lCol;
+//        int topRow = topmostRow;
 
-        int lowermostRow = lastElement - topmostRow;
-        int lowerRow = lastElement - topRow;
+        int lowermostRow = rmCol;
+        int lowerRow = rCol;
 
         for (int row = topmostRow; row <= topRow; row++) {
-            for (int col = leftmostCol; col <= rightmostCol; col++) {
+            for (int col = lmCol; col <= rmCol; col++) {
                 result.add(new MoCoord(row, col));
             }
         }
 
         // Right side
         for (int row = topmostRow; row <= lowermostRow; row++) {
-            for (int col = rightCol; col <= rightmostCol; col++) {
+            for (int col = rCol; col <= rmCol; col++) {
                 result.add(new MoCoord(row, col));
             }
         }
 
         // Bottom side
         for (int row = lowerRow; row <= lowermostRow; row++) {
-            for (int col = leftmostCol; col <= rightmostCol; col++) {
+            for (int col = lmCol; col <= rmCol; col++) {
                 result.add(new MoCoord(row, col));
             }
         }
 
         // Left side
         for (int row = topmostRow; row <= lowermostRow; row++) {
-            for (int col = leftmostCol; col <= leftCol; col++) {
+            for (int col = lmCol; col <= lCol; col++) {
                 result.add(new MoCoord(row, col));
             }
         }
@@ -265,11 +268,10 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     }
 
     /**
-     * Find the error elements (depends on the target elements and tolerance)
-     * @param targetElements Target elements
+     * Find the error elements (uses lmCol, ... calculated in findTargetElements)
      * @return List of MoCoord
      */
-    private ArrayList<MoCoord> findErrorElements(ArrayList<MoCoord> targetElements) {
+    private ArrayList<MoCoord> findErrorElements() {
         ArrayList<MoCoord> result = new ArrayList<>();
 
         final int tol = ExperimentFrame.TARGET_TOLERANCE;
@@ -277,31 +279,32 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         final int centerElement = ZoomTaskPanel.N_ELEMENTS / 2 + 1;
 
         // Sort the target elements' X
-        final List<Integer> xList = new ArrayList<>();
-        for (MoCoord coord : targetElements) {
-            xList.add(coord.x);
-        }
-        Collections.sort(xList);
-
-        // Find the bounds of targetElements
-        int leftOutBoundary = xList.get(0);
-        int rightOutBoundary = xList.get(xList.size() - 1);
-        int leftInBoundary = leftOutBoundary + 2 * tol / notchInElement;
-        int rightInBoundary = rightOutBoundary - 2 * tol / notchInElement;
+//        final List<Integer> targetList = new ArrayList<>();
+//        for (MoCoord coord : targetElements) {
+//            targetList.add(coord.x);
+//        }
+//        Collections.sort(targetList);
+//
+//        // Find the bounds of targetElements
+//        int leftOutBoundary = targetList.get(0);
+//        int rightOutBoundary = targetList.get(targetList.size() - 1);
+//        int leftInBoundary = leftOutBoundary + 2 * tol / notchInElement;
+//        int rightInBoundary = rightOutBoundary - 2 * tol / notchInElement;
 
         if (trial.task.equals(Task.ZOOM_OUT)) {
             // Color the outside
             for (MoCoord element : zoomElements) {
-                if (element.isEitherLess(leftOutBoundary) || element.isEitherMore(rightOutBoundary)) {
+                if (element.isEitherLess(lmCol) || element.isEitherMore(rmCol)) {
                     result.add(element);
                 }
             }
         }
 
         if (trial.task.equals(Task.ZOOM_IN)) {
+            conLog.debug("lcol, rcol: {}, {}", lCol, rCol);
             // Color the inside
             for (MoCoord element : zoomElements) {
-                if (element.isBothInBetween(leftInBoundary, rightInBoundary, "00")) {
+                if (element.isBothInBetween(lCol, rCol, "00")) {
                     result.add(element);
                 }
             }
@@ -315,7 +318,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
      * @return True (Hit) or False
      */
     protected boolean checkHit() {
-        conLog.info("CheckHit – currentNotch: {}", currentNotch);
+        conLog.debug("CheckHit – currentNotch: {}", currentNotch);
         return Utils.isBetween(Math.floor(currentNotch),
                 trial.targetNotch - ExperimentFrame.TARGET_TOLERANCE,
                 trial.targetNotch + ExperimentFrame.TARGET_TOLERANCE,
@@ -389,10 +392,6 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
                 Logex.get().logError(ErrorEvent.SPACE_ZOOM, ErrorEvent.OUTSIDE_ZVP);
             } else {
                 if (checkHit()) {
-                    conLog.debug("Time from first zoom = {}",
-                            Logex.get().getTrialInstant(TrialEvent.FIRST_ZOOM).until(
-                                    Instant.now(),
-                                    ChronoUnit.MILLIS));
                     endTrialAction.actionPerformed(e);
                 } else { // Not the correct zoom level
                     borderBlinker.start();

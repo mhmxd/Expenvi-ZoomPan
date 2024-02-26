@@ -33,12 +33,18 @@ public class BaseBlock {
 //                int START_LEVEL = 1; // Outer ring
                 for (int j = 0; j < repetition; j++) {
                     for (int dist : TARGET_DISTS) {
+                        conLog.debug("Dist = {}", dist);
                         // Choose the target randomly (from 1 to total n levels - dist - tol)
-                        final int targetLevel = Utils.randMulInt(
+                        final int noelMult = Utils.randMulInt(
                                 dist + TARGET_TOLERANCE,
-                                MAX_NOTCHES - dist - TARGET_TOLERANCE - NOTCHES_IN_ELEMENT,
+                                MAX_NOTCHES - TARGET_TOLERANCE,
                                 NOTCHES_IN_ELEMENT);
-                        trials.add(new ZoomTrial(Task.ZOOM_IN, targetLevel - dist, targetLevel));
+                        final int targetLevel = noelMult + NOTCHES_IN_ELEMENT / 2; // Always center of the next circle
+
+                        trials.add(new ZoomTrial(Task.ZOOM_IN, targetLevel - dist,
+                                targetLevel));
+                        conLog.debug("ZI: Noel = {} -> Target = {} -> Start = {}",
+                                noelMult, targetLevel, targetLevel - dist);
                     }
 
                     Collections.shuffle(trials);
@@ -55,12 +61,20 @@ public class BaseBlock {
 
 //                int START_LEVEL = ZoomTaskPanel.ZOOM_N_ELEMENTS / 2 + 1; // Central circle
                 for (int dist : TARGET_DISTS) {
-                    // Choose the target randomly (from 1 to total n levels - dist - tol)
-                    final int targetLevel = Utils.randMulInt(
-                            NOTCHES_IN_ELEMENT + TARGET_TOLERANCE,
-                            MAX_NOTCHES - dist - TARGET_TOLERANCE,
-                            NOTCHES_IN_ELEMENT);
-                    trials.add(new ZoomTrial(Task.ZOOM_OUT, targetLevel + dist, targetLevel));
+                    for (int j = 0; j < repetition; j++) {
+                        conLog.debug("Dist = {}", dist);
+                        // Choose the target randomly (from 1 to total n levels - dist - tol)
+                        final int noelMult = Utils.randMulInt(
+                                TARGET_TOLERANCE,
+                                MAX_NOTCHES - TARGET_TOLERANCE - dist,
+                                NOTCHES_IN_ELEMENT);
+                        final int targetLevel = noelMult + NOTCHES_IN_ELEMENT / 2; // Always center of the next circle
+
+                        trials.add(new ZoomTrial(Task.ZOOM_OUT, targetLevel + dist,
+                                targetLevel));
+                        conLog.debug("ZO: Noel = {} -> Target = {} -> Start = {}",
+                                noelMult, targetLevel, targetLevel + dist);
+                    }
                 }
 
                 Collections.shuffle(trials);
@@ -83,10 +97,6 @@ public class BaseBlock {
                 }
                 // Shuffle the trials
                 Collections.shuffle(trials);
-
-                for (BaseTrial trial : trials) {
-                    conLog.info(trial);
-                }
             }
         }
 

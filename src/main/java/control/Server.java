@@ -62,12 +62,12 @@ public class Server {
         @Override
         public void run() {
             try {
-                conLog.info("Opening socket...");
+                conLog.trace("Opening socket...");
                 if (serverSocket == null) {
-                    conLog.info("Socket was null");
+                    conLog.trace("Socket was null");
                     serverSocket = new ServerSocket(PORT);
                 }
-                conLog.info("Accepting connections...");
+                conLog.trace("Accepting connections...");
                 openSocket = serverSocket.accept();
 
                 // Create streams
@@ -75,7 +75,7 @@ public class Server {
                 outPW = new PrintWriter(
                         new BufferedWriter(new OutputStreamWriter(openSocket.getOutputStream())),
                         true);
-                conLog.info("Ready! Listening to incoming messages...");
+                conLog.trace("Ready! Listening to incoming messages...");
                 // Start receiving
                 executor.execute(new InRunnable());
 

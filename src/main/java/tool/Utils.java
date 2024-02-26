@@ -1,5 +1,8 @@
 package tool;
 
+import org.tinylog.Logger;
+import org.tinylog.TaggedLogger;
+
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -7,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static tool.Constants.*;
 
 public class Utils {
+    private static final TaggedLogger conLog = Logger.tag(Utils.class.getSimpleName());
 
     private static final long MS_IN_DAY = 24 * 60 * 60 * 1000; // Milliseconds in a day
 
@@ -17,8 +21,8 @@ public class Utils {
      * @return Random int
      */
     public static int randInt(int min, int bound) {
-        if (bound <= min) return min;
-        else return ThreadLocalRandom.current().nextInt(min, bound);
+        if (bound <= min) return -1;
+        else return new Random().nextInt(min, bound);
     }
 
     /**
@@ -47,16 +51,9 @@ public class Utils {
      * @return Random int
      */
     public static int randMulInt(int min, int bound, int mult) {
-        if (bound <= min) return min;
-        else {
-            Random random = new Random();
-            int randomInt;
-            do {
-                randomInt = random.nextInt(bound - min) + min;
-            } while (randomInt % mult != 0); // Keep generating until we get a multiple number
-
-            return randomInt;
-        }
+        conLog.trace("min; bound = {}; {}", min, bound);
+        if (bound <= min) return -1;
+        return mult * randInt(min / mult, bound / mult);
     }
 
     public static int getLastIndBelow(List<Integer> list, int threshold) {

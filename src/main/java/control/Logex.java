@@ -64,25 +64,41 @@ public class Logex {
      * @param key Key from TrialEvent
      */
     public void logEvent(String key) {
-        if (key == TrialEvent.TRIAL_OPEN || key == TrialEvent.TRIAL_CLOSE || key == TrialEvent.SPACE_PRESS) {
-            trialLogs.put(key, new TrialEvent(key));
-            return;
+
+        switch (key) {
+            case null -> {
+                // Do nothing
+            }
+
+            // No first, last
+            case TrialEvent.TRIAL_OPEN, TrialEvent.TRIAL_CLOSE, TrialEvent.SPACE_PRESS ->
+                    trialLogs.put(key, new TrialEvent(key));
+
+            // Log first, last
+            default -> {
+                String eventFirstName = TrialEvent.getFirst(key);
+                String eventLastName = TrialEvent.getLast(key);
+
+                // If first is empty, add first
+                if (!trialLogs.containsKey(eventFirstName)) {
+                    trialLogs.put(eventFirstName, new TrialEvent(eventFirstName));
+                    conLog.debug("Logged {}, {}", eventFirstName, getTrialInstant(eventFirstName));
+                }
+
+                // Add last
+                trialLogs.put(eventLastName, new TrialEvent(eventLastName));
+                conLog.debug("Logged {}", eventLastName);
+            }
         }
 
-        String eventFirstName = TrialEvent.getFirstName(key);
-        String eventLastName = TrialEvent.getLastName(key);
 
-        // If first is empty, add first
-        if (!trialLogs.containsKey(eventFirstName)) {
-            trialLogs.put(eventFirstName, new TrialEvent(eventFirstName));
-            conLog.trace("Logged {}, {}", eventFirstName, getTrialInstant(eventFirstName));
-        }
-
-        // Add last
-        trialLogs.put(eventLastName, new TrialEvent(eventLastName));
-        conLog.trace("Logged {}", eventLastName);
     }
 
+    /**
+     * Log an error
+     * @param errKey String key
+     * @param errCode int code (from ErrorEvent)
+     */
     public void logError(String errKey, int errCode) {
         errorLogs.put(errKey, new ErrorEvent(errKey, errCode));
     }
@@ -106,10 +122,16 @@ public class Logex {
         else return Instant.MIN;
     }
 
+    /**
+     * Return the duration (in sec.) between two Instants (indicated by begin and end keys)
+     * @param beginKey String begin key
+     * @param endKey String end key
+     * @return double Duration (in seconds)
+     */
     public double getDurationSec(String beginKey, String endKey) {
         Instant beginInst = getTrialInstant(beginKey);
         Instant endInst = getTrialInstant(endKey);
-
+        conLog.debug("Begin = {}, End = {}", beginInst, endInst);
         if (beginInst.equals(Instant.MIN) || endInst.equals(Instant.MIN)) return Double.NaN;
         else return Duration.between(beginInst, endInst).toMillis() / 1000.0;
     }
@@ -120,8 +142,8 @@ public class Logex {
      * @return True if events for this key are logged
      */
     public boolean hasLoggedKey(String key) {
-        String lastName = TrialEvent.getLastName(key);
-        if (lastName != "") return trialLogs.containsKey(lastName);
+        String lastName = TrialEvent.getLast(key);
+        if (!lastName.isEmpty()) return trialLogs.containsKey(lastName);
         return false;
     }
 

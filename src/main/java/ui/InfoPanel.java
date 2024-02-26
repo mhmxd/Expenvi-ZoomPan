@@ -118,8 +118,6 @@ public class InfoPanel extends JPanel {
 //            System.exit(0);
 //        });
 
-        conLog.info("Set the location");
-
         initQrCode();
         // Center the JFrame on the screen
 //        setLocationRelativeTo(null);

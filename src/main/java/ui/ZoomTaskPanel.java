@@ -19,7 +19,6 @@ import tool.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -177,10 +176,6 @@ public class ZoomTaskPanel
         // Log
         Logex.get().activateTrial(activeTrial);
         Logex.get().logEvent(TrialEvent.TRIAL_OPEN);
-
-        // Console
-        conLog.info("Trial from, to: {}, {}",
-                ((ZoomTrial) activeTrial).startNotch, ((ZoomTrial) activeTrial).targetNotch);
     }
 
     /**
@@ -211,10 +206,18 @@ public class ZoomTaskPanel
         @Override
         public void actionPerformed(ActionEvent e) {
             Logex.get().logEvent(TrialEvent.SPACE_PRESS);
-            double enterToSpace = Logex.get().getDurationSec(TrialEvent.FIRST_VIEWPORT_ENTER, TrialEvent.SPACE_PRESS);
-            double firstZoomToSpace = Logex.get().getDurationSec(TrialEvent.FIRST_ZOOM, TrialEvent.SPACE_PRESS);
-            double enterToLastZoom = Logex.get().getDurationSec(TrialEvent.FIRST_FOCUS_ENTER,TrialEvent.LAST_ZOOM);
-            double firstZoomToLastZoom = Logex.get().getDurationSec(TrialEvent.FIRST_ZOOM,TrialEvent.LAST_ZOOM);
+            double enterToSpace = Logex.get().getDurationSec(
+                    TrialEvent.getLast(TrialEvent.VIEWPORT_ENTER),
+                    TrialEvent.SPACE_PRESS);
+            double firstZoomToSpace = Logex.get().getDurationSec(
+                    TrialEvent.getFirst(TrialEvent.ZOOM),
+                    TrialEvent.SPACE_PRESS);
+            double enterToLastZoom = Logex.get().getDurationSec(
+                    TrialEvent.getLast(TrialEvent.VIEWPORT_ENTER),
+                    TrialEvent.getLast(TrialEvent.ZOOM));
+            double firstZoomToLastZoom = Logex.get().getDurationSec(
+                    TrialEvent.getFirst(TrialEvent.ZOOM),
+                    TrialEvent.getLast(TrialEvent.ZOOM));
 
             conLog.info("Times: {}, {}, {}, {}",
                     enterToSpace, firstZoomToSpace, enterToLastZoom, firstZoomToLastZoom);

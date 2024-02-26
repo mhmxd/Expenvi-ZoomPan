@@ -3,10 +3,7 @@ package enums;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.temporal.ChronoField;
 
 public class TrialEvent {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
@@ -16,23 +13,23 @@ public class TrialEvent {
     public static final String FIRST_MOVE = "first_move";
     public static final String LAST_MOVE = "last_move";
 
-    public static final String FIRST_VIEWPORT_ENTER = "viewport_first_enter";
-    public static final String LAST_VIEWPORT_ENTER = "viewport_last_enter";
+//    public static final String FIRST_VIEWPORT_ENTER = "first_viewport_enter";
+//    public static final String LAST_VIEWPORT_ENTER = "last_viewport_enter";
 
-    public static final String FIRST_ZOOM = "first_zoom";
-    public static final String LAST_ZOOM = "last_zoom";
+//    public static final String FIRST_ZOOM = "first_zoom";
+//    public static final String LAST_ZOOM = "last_zoom";
 
-    public static final String FIRST_PAN = "first_pan";
-    public static final String LAST_PAN = "last_pan";
+//    public static final String FIRST_PAN = "first_pan";
+//    public static final String LAST_PAN = "last_pan";
 
-    public static final String FIRST_FOCUS_ENTER = "first_focus_enter";
-    public static final String LAST_FOCUS_ENTER = "last_focus_enter";
+//    public static final String FIRST_FOCUS_ENTER = "first_focus_enter";
+//    public static final String LAST_FOCUS_ENTER = "last_focus_enter";
 
-    public static final String FIRST_FOCUS_EXIT = "first_focus_exit";
-    public static final String LAST_FOCUS_EXIT = "last_focus_exit";
-
-    public static final String FIRST_VIEWPORT_EXIT = "viewport_first_exit";
-    public static final String LAST_VIEWPORT_EXIT = "viewport_last_exit";
+//    public static final String FIRST_FOCUS_EXIT = "first_focus_exit";
+//    public static final String LAST_FOCUS_EXIT = "last_focus_exit";
+//
+//    public static final String FIRST_VIEWPORT_EXIT = "viewport_first_exit";
+//    public static final String LAST_VIEWPORT_EXIT = "viewport_last_exit";
 
     public static final String SPACE_PRESS = "space_press";
 
@@ -83,7 +80,7 @@ public class TrialEvent {
      * @param key Key (form the keys here)
      * @return Event name of the last occurance
      */
-    public static String getLastName(String key) {
+    public static String getLast(String key) {
         return "last_" + key;
     }
 
@@ -93,7 +90,7 @@ public class TrialEvent {
      * @param key Key (form the keys here)
      * @return Event name of the first occurance
      */
-    public static String getFirstName(String key) {
+    public static String getFirst(String key) {
         return "first_" + key;
     }
 }
