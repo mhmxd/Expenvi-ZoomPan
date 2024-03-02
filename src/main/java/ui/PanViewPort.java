@@ -50,6 +50,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
     private final PanFocusArea focusArea;
     private boolean hasFocus;
     private boolean isPanning;
+    private boolean isTrialActive;
     private static final int startPosX = 100;
     private static final int startPosY = 500;
 //    private static final int startBorderSize = 100;
@@ -137,6 +138,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         yDiff = null;
 
         focusArea.setActive(false);
+        isTrialActive = true;
 
         SVGDiagram diagram = SVGCache.getSVGUniverse().getDiagram(uri);
         SVGRoot root = diagram.getRoot();
@@ -163,9 +165,8 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @return True (Hit) or False
      */
     protected boolean isTrialFinished() {
-        if (image == null) return false;
 
-        this.paintComponent(image.getGraphics());
+        paintComponent(image.getGraphics());
 
         int[] focusAreaPixels = image.getRGB(
                 focusArea.getX(),
@@ -202,7 +203,6 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         boolean focusEntered = Logex.get().hasLogged(TrialEvent.getFirst(TrialEvent.FOCUS_ENTER));
 
         // Check if line is inside focus area
-        focusArea.setActive(false);
         if (focusEntered) nScans++; // Only count after entering the focus area
         for (int c : focusPixels) {
             Color clr = new Color(c);
@@ -215,6 +215,8 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
             }
         }
 
+        focusArea.setActive(false);
+
         // No black was found
         logOutsideFocus();
     }
@@ -225,9 +227,10 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
      * @param focusPixels Array of RGBA pixels
      */
     private boolean scanFocusAreaForLineEnd(int[] focusPixels) {
+        conLog.trace("Num of focus pixels = {}", focusPixels.length);
         for (int c : focusPixels) {
             Color clr = new Color(c);
-            if (clr.equals(PanTaskPanel.END_CIRCLE_COLOR)) {
+            if (clr.equals(COLORS.PAN_CIRCLE)) {
                 return true;
             }
         }
@@ -254,22 +257,29 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
         this.xDiff += dX;
         this.yDiff += dY;
 
+        if (image == null) return;
+
         repaint();
 
-        // Check for the end of the trial
-        SwingUtilities.invokeLater(() -> {
-            if (isTrialFinished()) {
-                Duration totalTrialDuration = Duration.between(
-                        Logex.get().getTrialInstant(TrialEvent.getFirst(TrialEvent.FOCUS_ENTER)),
-                        Instant.now());
+        if (isTrialFinished()) {
+            Duration totalTrialDuration = Duration.between(
+                    Logex.get().getTrialInstant(TrialEvent.getFirst(TrialEvent.FOCUS_ENTER)),
+                    Instant.now());
+            conLog.debug("Duration = {}", totalTrialDuration);
+            // < 90% of the curve traversed inside the focus area => error
+            ActionEvent endTrialEvent = (wasTrialAccurate())
+                    ? new ActionEvent(this, TrialStatus.HIT, "")
+                    : new ActionEvent(this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT);
+            endTrialAction.actionPerformed(endTrialEvent);
 
-                // < 90% of the curve traversed inside the focus area => error
-                ActionEvent endTrialEvent = (wasTrialAccurate())
-                        ? new ActionEvent(this, TrialStatus.HIT, "")
-                        : new ActionEvent(this, TrialStatus.ERROR, TrialStatus.TEN_PERCENT_OUT);
-                endTrialAction.actionPerformed(endTrialEvent);
-            }
-        });
+            isTrialActive = false;
+        }
+
+
+        // Check for the end of the trial
+//        SwingUtilities.invokeLater(() -> {
+//
+//        });
     }
 
     @Override
@@ -318,7 +328,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (hasFocus) { // Pressed inside
+        if (isTrialActive && hasFocus) { // Pressed inside
             isPanning = true;
 
             // Get the start point
@@ -354,7 +364,7 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (isPanning) {
+        if (isTrialActive && isPanning) {
             Point curPoint = e.getLocationOnScreen();
             int xDiff = curPoint.x - dragPoint.x;
             int yDiff = curPoint.y - dragPoint.y;
@@ -377,9 +387,11 @@ public class PanViewPort extends JPanel implements MouseListener, MouseMotionLis
 
     @Override
     public void mooseScrolled(Memo mem) {
-        conLog.trace("Translate: {}, {}", mem.getV1Int(), mem.getV2Int());
-        if (hasFocus) {
-            translate((int) (mem.getV1Int() * PanTaskPanel.GAIN), (int) (mem.getV2Int() * PanTaskPanel.GAIN));
+        if (isTrialActive && hasFocus) {
+            conLog.debug("Translate: {}, {}", mem.getV1Int(), mem.getV2Int());
+            translate(
+                    (int) (mem.getV1Int() * ExperimentFrame.PAN_MOOSE_GAIN),
+                    (int) (mem.getV2Int() * ExperimentFrame.PAN_MOOSE_GAIN));
         }
     }
 

@@ -89,12 +89,13 @@ public class BaseBlock {
 
             case PAN -> {
                 // For each repetition: randomly choose the rotation for the short curve. Next two will be +120 and +240
-                for (int i = 0; i < PanTaskPanel.NUM_REP_IN_BLOCK; i++) {
+                for (int i = 0; i < NUM_PAN_REPS; i++) {
                     int rotation = Utils.randInt(0, 360);
                     trials.add(new PanTrial(1, rotation));
                     trials.add(new PanTrial(2, (rotation + 120) % 360)); // Go over the next rotation
                     trials.add(new PanTrial(3, (rotation + 240) % 360)); // Go over the next rotation
                 }
+
                 // Shuffle the trials
                 Collections.shuffle(trials);
             }

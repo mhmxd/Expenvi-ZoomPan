@@ -22,15 +22,19 @@ public class ExperimentFrame extends JFrame {
 
     // Zoom -----------------------------------------------
     public static final int NUM_ZOOM_BLOCKS = 10;
-    public static final int NUM_ZOOM_REPETITIONS = 5; // Repititions inside a block
+    public static final int NUM_ZOOM_REPS = 5; // Repititions inside a block
 
     public static int MAX_NOTCHES = 120; // Arbitrary (between Win 44 and Mac 300)
     public static int[] TARGET_DISTS = new int[]{15, 30, 60}; // In notches
     public static int NOTCHES_IN_ELEMENT = 6;
-    public static final int TARGET_TOLERANCE = 9; //  Tolerance (in notches)
+    public static final int TARGET_TOLERANCE = 3; //  Tolerance (in notches)
     public static final float MOOSE_MM_TO_NOTCH = 0.1f;
 
+    // Pan ------------------------------------------------
+    public static final int NUM_PAN_BLOCKS = 2;
+    public static final int NUM_PAN_REPS = 2;
 
+    public static final double PAN_MOOSE_GAIN = 0.5;
 
     public static double LR_MARGIN_MM = 20.0;
 

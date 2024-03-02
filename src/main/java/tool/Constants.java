@@ -28,6 +28,7 @@ public class Constants {
         public static final Color RED = new Color(255, 0, 0);
 //        public static final Color MAIN_BACKGROUND = Color.WHITE;
         public static final Color YELLOW = new Color(237, 217, 42);
+        public static final Color PAN_CIRCLE = Color.decode("#E3CE17");
         public static final Color BLUE = new Color(100, 181, 246);
 
         public static String getHex(Color c) {

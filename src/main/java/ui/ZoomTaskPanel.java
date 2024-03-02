@@ -136,7 +136,7 @@ public class ZoomTaskPanel
         super.createBlocks();
 
         for (int i = 0; i < NUM_ZOOM_BLOCKS; i++) {
-            blocks.add(new BaseBlock(i + 1, task, NUM_ZOOM_REPETITIONS));
+            blocks.add(new BaseBlock(i + 1, task, NUM_ZOOM_REPS));
         }
     }
 
@@ -156,6 +156,7 @@ public class ZoomTaskPanel
      */
     @Override
     protected void showActiveTrial() {
+
         // Clear the viewport (if added)
         if (getIndexOf(zoomViewPort) != -1) {
             remove(zoomViewPort);
@@ -219,8 +220,7 @@ public class ZoomTaskPanel
                     TrialEvent.getFirst(TrialEvent.ZOOM),
                     TrialEvent.getLast(TrialEvent.ZOOM));
 
-            conLog.info("Times: {}, {}, {}, {}",
-                    enterToSpace, firstZoomToSpace, enterToLastZoom, firstZoomToLastZoom);
+            conLog.info("En->lZ = {}, fZ->lZ = {}", enterToLastZoom, firstZoomToLastZoom);
 
             endTrial(TrialStatus.HIT);
         }

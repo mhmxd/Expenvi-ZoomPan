@@ -54,8 +54,6 @@ public class TrialEvent {
     public TrialEvent(String n) {
         key = n;
         instant = Instant.now();
-
-        conLog.debug("{} – {}", key, instant.toString());
     }
 
     /**

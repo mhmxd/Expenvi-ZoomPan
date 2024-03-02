@@ -46,6 +46,9 @@ public class Logex {
         // Clear the log maps
         trialLogs.clear();
         errorLogs.clear();
+
+        // Add the trial open log
+        logEvent(TrialEvent.TRIAL_OPEN);
     }
 
     /**
@@ -71,8 +74,11 @@ public class Logex {
             }
 
             // No first, last
-            case TrialEvent.TRIAL_OPEN, TrialEvent.TRIAL_CLOSE, TrialEvent.SPACE_PRESS ->
-                    trialLogs.put(key, new TrialEvent(key));
+            case TrialEvent.TRIAL_OPEN, TrialEvent.TRIAL_CLOSE, TrialEvent.SPACE_PRESS -> {
+                trialLogs.put(key, new TrialEvent(key));
+                conLog.debug("Logged {}", key);
+            }
+
 
             // Log first, last
             default -> {
@@ -87,7 +93,7 @@ public class Logex {
 
                 // Add last
                 trialLogs.put(eventLastName, new TrialEvent(eventLastName));
-                conLog.debug("Logged {}", eventLastName);
+                conLog.trace("Logged {}", eventLastName);
             }
         }
 

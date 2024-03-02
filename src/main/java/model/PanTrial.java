@@ -10,11 +10,13 @@ import java.util.Objects;
 import static tool.Resources.*;
 
 public class PanTrial extends BaseTrial {
+    public int level;
     public URI uri;
     public Integer rotation;
 
     public PanTrial(int level, Integer rotation) {
         super(Task.PAN);
+        this.level = level;
 
         switch (level) {
             case 1 -> uri = SVG.PAN_LVL1_URI;
@@ -28,8 +30,9 @@ public class PanTrial extends BaseTrial {
     @Override
     public String toString() {
         return "PanTrial{" +
-                id + " | " +
-                trialNum +
+                "id=" + id +
+                ", level=" + level +
+                ", rotation=" + rotation +
                 '}';
     }
 }

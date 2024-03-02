@@ -2,6 +2,7 @@ package ui;
 
 import control.Logex;
 import enums.Task;
+import enums.TrialEvent;
 import enums.TrialStatus;
 import model.BaseBlock;
 import model.PanTrial;
@@ -23,14 +24,10 @@ public class PanTaskPanel extends TaskPanel {
     private final TaggedLogger conLog = Logger.tag(getClass().getSimpleName());
 
     // Constants
-    public static final int NUM_PAN_BLOCKS = 1;
-    public static final int NUM_REP_IN_BLOCK = 2;
 //    public static final int NUM_PAN_TRIALS_IN_BLOCK = 6; // Christian only used this, no blocking
     public static final double VP_SIZE_mm = 200;
-    public static final double FOCUS_SIZE_mm = 0.3 * 200;
-    public static final double GAIN = 0.5;
+    public static final double FOCUS_SIZE_mm = 0.3 * VP_SIZE_mm;
     public static final int ERROR_DURATION = 3 * 1000; // (ms) Duration to keep the error visible
-    public static final Color END_CIRCLE_COLOR = COLORS.YELLOW; // Color should be matched to SVG
 
     // Experiment
     private final Task task;
@@ -69,7 +66,7 @@ public class PanTaskPanel extends TaskPanel {
     protected void createBlocks() {
         super.createBlocks();
 
-        for (int i = 0; i < NUM_PAN_BLOCKS; i++) {
+        for (int i = 0; i < ExperimentFrame.NUM_PAN_BLOCKS; i++) {
             blocks.add(new BaseBlock(i + 1, task, 1));
         }
     }
@@ -183,22 +180,23 @@ public class PanTaskPanel extends TaskPanel {
     private final AbstractAction onFinishTrialAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            conLog.info("Trial {} Ended", activeTrial.id);
+            conLog.debug("Trial {} Ended", activeTrial.id);
             // There was an error
             if (e.getID() == TrialStatus.ERROR) {
-                conLog.info("Error");
+                conLog.info("Error: {}", e.getActionCommand());
                 // Curve was out more than 10% of the time
                 if (e.getActionCommand() == TrialStatus.TEN_PERCENT_OUT) {
-                    conLog.error("Trial Error: {}", e.getActionCommand());
                     // Show the error (automatically goes to the next trial)
                     showError("The curve must not be outside for more than 10% of the time!");
                 }
             } else {
-                conLog.info("Hit");
+                double firstPanToLastPan = Logex.get().getDurationSec(
+                        TrialEvent.getFirst(TrialEvent.PAN),
+                        TrialEvent.getLast(TrialEvent.PAN));
+
+                conLog.info("Time: FP-LP = {}", firstPanToLastPan);
                 endTrial(TrialStatus.HIT);
             }
-
-            conLog.info("--------------------------");
         }
     };
 }
