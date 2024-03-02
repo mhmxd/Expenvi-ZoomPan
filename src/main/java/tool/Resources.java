@@ -21,6 +21,8 @@ public class Resources {
         public static URI PAN_LVL2_URI = URI.create("");
         public static URI PAN_LVL3_URI = URI.create("");
 
+        public static URI SIMPLE_SVG = URI.create("");
+
         static {
             try {
                 // Load the SVG resources
@@ -30,6 +32,8 @@ public class Resources {
                 PAN_LVL1_URI = Objects.requireNonNull(SVG.class.getResource("/curve1.svg")).toURI();
                 PAN_LVL2_URI = Objects.requireNonNull(SVG.class.getResource("/curve2.svg")).toURI();
                 PAN_LVL3_URI = Objects.requireNonNull(SVG.class.getResource("/curve3.svg")).toURI();
+
+                SIMPLE_SVG = Objects.requireNonNull(SVG.class.getResource("/simple.svg")).toURI();
 
             } catch(URISyntaxException ignored) {
                 conLog.error("Could not load the SVGs");

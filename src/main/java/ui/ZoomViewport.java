@@ -16,6 +16,7 @@ import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.MoCoord;
 import tool.MoKey;
+import tool.Resources;
 import tool.Utils;
 
 import javax.swing.*;
@@ -107,11 +108,11 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         setBorder(BORDERS.BLACK_BORDER);
 
         //-- Set up svg
-        final String path = trial.task.equals(Task.ZOOM_IN)
-                ? ZoomTaskPanel.ZOOM_IN_SVG_FILE_NAME
-                : ZoomTaskPanel.ZOOM_OUT_SVG_FILE_NAME;
-        svgURI = Paths.get(path).toUri();
-
+//        final String path = trial.task.equals(Task.ZOOM_IN)
+//                ? ZoomTaskPanel.ZOOM_IN_SVG_FILE_NAME
+//                : ZoomTaskPanel.ZOOM_OUT_SVG_FILE_NAME;
+//        svgURI = Paths.get(path).toUri();
+        svgURI = Resources.SVG.SIMPLE_SVG;
         svgIcon = new SVGIcon();
         svgIcon.setAntiAlias(true);
         svgIcon.setAutosize(SVGPanel.AUTOSIZE_BESTFIT);
