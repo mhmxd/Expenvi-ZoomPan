@@ -14,10 +14,7 @@ import moose.Memo;
 import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
-import tool.MoCoord;
-import tool.MoKey;
-import tool.Resources;
-import tool.Utils;
+import tool.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -43,7 +40,7 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     private final int BLINKER_DELAY = 100; // ms
 
     private final ZoomTrial trial;
-    private final ArrayList<MoCoord> zoomElements;
+//    private final ArrayList<MoCoord> zoomElements;
     private final AbstractAction endTrialAction; // Received from higher levels
 
     private Boolean firstZoomInRightDirection;
@@ -51,6 +48,9 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
     private int svgSize;
     private double nVisibleEl = ZoomTaskPanel.N_ELEMENTS;
     private float currentNotch;
+
+    // Background panel (used for the border)
+    private ZoomView zoomView = new ZoomView();
 
     // Tools
     private Robot robot;
@@ -99,13 +99,23 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
      */
     public ZoomViewport(Moose moose, ZoomTrial zTrial, ArrayList<MoCoord> zElements, AbstractAction endTrAction) {
         trial = zTrial;
-        zoomElements = new ArrayList<>(zElements);
+//        zoomElements = new ArrayList<>(zElements);
         endTrialAction = endTrAction;
         conLog.info("Trial: {}", trial);
         conLog.info("Distance = {}", trial.targetNotch - trial.startNotch);
 
         setLayout(null);
-        setBorder(BORDERS.BLACK_BORDER);
+//        setBorder(BORDERS.BLACK_BORDER);
+
+        // Set the back panel
+        int bpX = this.getX() - BORDERS.THICKNESS_2;
+        int bpY = this.getY() - BORDERS.THICKNESS_2;
+        int bpSize = this.getWidth() + 2 * BORDERS.THICKNESS_2;
+//        backPanel = new JPanel();
+//        backPanel.setBackground(COLORS.BLACK);
+//        backPanel.setBounds(bpX, bpY, bpSize, bpSize);
+
+
 
         //-- Set up svg
 //        final String path = trial.task.equals(Task.ZOOM_IN)
@@ -142,6 +152,29 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
         addMouseWheelListener(this);
         addMouseListener(this);
         moose.addMooseListener(this);
+    }
+
+    public ZoomViewport(Dimension dim, Moose moose, ZoomTrial zTrial, AbstractAction endTrAction) {
+        trial = zTrial;
+        endTrialAction = endTrAction;
+        conLog.info("Trial: {}", trial);
+        conLog.info("Distance = {}", trial.targetNotch - trial.startNotch);
+
+        // True size is the back panel (includes borders)
+        setBackground(COLORS.BLACK);
+        setSize(new MoDimension(dim, 2 * BORDERS.THICKNESS_2));
+        setLayout(null);
+
+        // Create the inside panel
+//        zoomView = new Zo();
+        zoomView.setBounds(BORDERS.THICKNESS_2, BORDERS.THICKNESS_2, dim.width, dim.height);
+        add(zoomView);
+        conLog.info("ZoomView Size = {}", zoomView.getSize());
+        // Load the svg
+        svgURI = Resources.SVG.ZOOM_IN_URI;
+        svgIcon = new SVGIcon();
+        svgIcon.setAntiAlias(true);
+        svgIcon.setAutosize(SVGPanel.AUTOSIZE_BESTFIT);
     }
 
     @Override
@@ -292,24 +325,24 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
 //        int leftInBoundary = leftOutBoundary + 2 * tol / notchInElement;
 //        int rightInBoundary = rightOutBoundary - 2 * tol / notchInElement;
 
-        if (trial.task.equals(Task.ZOOM_OUT)) {
-            // Color the outside
-            for (MoCoord element : zoomElements) {
-                if (element.isEitherLess(lmCol) || element.isEitherMore(rmCol)) {
-                    result.add(element);
-                }
-            }
-        }
-
-        if (trial.task.equals(Task.ZOOM_IN)) {
-            conLog.debug("lcol, rcol: {}, {}", lCol, rCol);
-            // Color the inside
-            for (MoCoord element : zoomElements) {
-                if (element.isBothInBetween(lCol, rCol, "00")) {
-                    result.add(element);
-                }
-            }
-        }
+//        if (trial.task.equals(Task.ZOOM_OUT)) {
+//            // Color the outside
+//            for (MoCoord element : zoomElements) {
+//                if (element.isEitherLess(lmCol) || element.isEitherMore(rmCol)) {
+//                    result.add(element);
+//                }
+//            }
+//        }
+//
+//        if (trial.task.equals(Task.ZOOM_IN)) {
+//            conLog.debug("lcol, rcol: {}, {}", lCol, rCol);
+//            // Color the inside
+//            for (MoCoord element : zoomElements) {
+//                if (element.isBothInBetween(lCol, rCol, "00")) {
+//                    result.add(element);
+//                }
+//            }
+//        }
 
         return result;
     }
@@ -326,17 +359,17 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
                 "11");
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-//        Graphics2D g2D = (Graphics2D) g;
-
-        // Transform the svg
-        svgIcon.setPreferredSize(new Dimension(svgSize, svgSize));
-        int newCoord = - (svgSize - getWidth()) / 2;
-        svgIcon.paintIcon(this, g, newCoord, newCoord);
-//        conLog.info("Paint svgSize = {}", svgSize);
-    }
+//    @Override
+//    protected void paintComponent(Graphics g) {
+//        super.paintComponent(g);
+////        Graphics2D g2D = (Graphics2D) g;
+//
+//        // Transform the svg
+////        svgIcon.setPreferredSize(new Dimension(svgSize, svgSize));
+////        int newCoord = - (svgSize - getWidth()) / 2;
+////        svgIcon.paintIcon(this, zoomView.getGraphics(), newCoord, newCoord);
+////        conLog.info("Paint svgSize = {}", svgSize);
+//    }
 
     /**
      * Find SVG size based on the current notch
@@ -381,6 +414,19 @@ public class ZoomViewport extends JPanel implements MouseListener, MouseWheelLis
                 dNotch, currentNotch, nVisibleEl);
         double cirSize = getWidth() / nVisibleEl;
         return (int) (cirSize * ZoomTaskPanel.N_ELEMENTS);
+    }
+
+    // -------------------------------------------------------------------------------------------
+    private class ZoomView extends JPanel {
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            conLog.info("Painting ZoomView");
+            svgIcon.setPreferredSize(new Dimension(svgSize, svgSize));
+            int newCoord = - (svgSize - getWidth()) / 2;
+            svgIcon.paintIcon(this, g, newCoord, newCoord);
+        }
     }
 
     // -------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@ import moose.Moose;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 import tool.MoCoord;
+import tool.MoDimension;
 import tool.MoSVG;
 import tool.Utils;
 
@@ -168,9 +169,12 @@ public class ZoomTaskPanel
 //        progressLabel.setVisible(true);
 
         // Create the viewport for showing the trial
-        zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, zoomElements, endTrialAction);
+//        zoomViewPort = new ZoomViewport(moose, (ZoomTrial) activeTrial, zoomElements, endTrialAction);
+        MoDimension moDim = new MoDimension(zvpSize);
+        zoomViewPort = new ZoomViewport(moDim, moose, (ZoomTrial) activeTrial, endTrialAction);
         Point position = findPositionForViewport(activeTrial.trialNum);
-        zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
+        zoomViewPort.setLocation(position);
+//        zoomViewPort.setBounds(position.x, position.y, zvpSize, zvpSize);
         zoomViewPort.setVisible(true);
         add(zoomViewPort, PALETTE_LAYER);
 
